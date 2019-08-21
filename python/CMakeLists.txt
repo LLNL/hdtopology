@@ -1,0 +1,76 @@
+cmake_minimum_required(VERSION 3.12)
+cmake_policy(SET CMP0086 NEW)
+cmake_policy(SET CMP0078 NEW)
+
+find_package(SWIG REQUIRED)
+
+INCLUDE(${SWIG_USE_FILE})
+
+set(CMAKE_FIND_FRAMEWORK LAST)
+find_package(Python3 COMPONENTS Interpreter Development NumPy)
+#find_package(NumPy REQUIRED )
+
+
+set(CMAKE_VERBOSE_MAKEFILE YES)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
+
+set(CMAKE_BUILD_TYPE "Release")
+
+
+set(SWIG_SRC
+       hdtopology.i
+)
+
+
+MESSAGE("PYTHON_EXECUTABLE: " ${Python3_EXECUTABLE})
+MESSAGE("PYTHON_INCLUDE_DIR: " ${Python3_INCLUDE_DIRS})
+MESSAGE("PYTHON_LIBRARIES: " ${Python3_LIBRARIES})
+MESSAGE("PYTHON_NUMPY_INCLUDE: " ${Python3_NumPy_INCLUDE_DIRS})
+
+INCLUDE_DIRECTORIES(
+        ${CMAKE_SOURCE_DIR}/src
+        ${CMAKE_SOURCE_DIR}/python
+        ${Python3_INCLUDE_DIRS}
+        ${Python3_NumPy_INCLUDE_DIRS}
+        ${HDFILEFORMAT_INCLUDE_DIR}
+)
+
+if (NGLCU_FOUND)
+  include_directories(${NGLCU_INCLUDE_DIR})
+endif(NGLCU_FOUND)
+
+set_property(SOURCE ${SWIG_SRC} PROPERTY CPLUSPLUS ON)
+
+if (NGLCU_FOUND)
+	message("Building with CUDA-Enabled NGL support")
+    # add_definitions(-DNGLCU_AVAILABLE)
+    set(CMAKE_SWIG_FLAGS -DNGLCU_AVAILABLE)
+else()
+	message("CUDA-Enabled NGL not available")
+endif(NGLCU_FOUND)
+
+
+SWIG_ADD_LIBRARY(hdtopology LANGUAGE python SOURCES ${SWIG_SRC})
+# SWIG_ADD_LIBRARY(hdtopology TYPE SHARED LANGUAGE python SOURCES ${SWIG_SRC})
+SWIG_LINK_LIBRARIES(hdtopology ${Python3_LIBRARIES} ${HDFILEFORMAT_LIBRARY} chdtopology)
+
+if (NGLCU_FOUND)
+  include_directories(${NGLCU_INCLUDE_DIR})
+  swig_link_libraries(hdtopology ${NGLCU_LIBRARY})
+endif(NGLCU_FOUND)
+
+
+SET(SWIG_MODULE_hdtopology_EXTRA_DEPS typemaps.i)
+
+SET(PKG_FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/hdtopology.py
+    ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
+    )
+
+INSTALL(FILES ${PKG_FILES}
+        DESTINATION ${Python3_SITEARCH}/hdtopology
+)
+
+INSTALL(TARGETS hdtopology
+        DESTINATION ${Python3_SITEARCH}/hdtopology
+)
