@@ -7,7 +7,6 @@
 #ifdef NGLCU_AVAILABLE
     %include "NGLIterator.i"
 #endif
-%include "FileIO.i"
 %include "Histogram.i"
 %include "JointDistributions.i"
 %include "Selectivity.i"

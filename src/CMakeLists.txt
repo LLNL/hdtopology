@@ -1,23 +1,21 @@
 
 SET (HDT_HEADERS
-  EdgeIterator.h   
-  FileIO.h    
+  EdgeIterator.h
   HDData.h    
-  JointDistributions.h  
+  JointDistributions.h
   Neighborhood.h
   ExtremumGraph.h
   Flags.h
-  Histogram.h   
-  NGLIterator.h   
+  Histogram.h
+  NGLIterator.h
   NeighborhoodIterator.h
   Selectivity.h
 )
 
 SET (HDT_SOURCES
- ExtremumGraph.cpp  
- FileIO.cpp    
- HDData.cpp    
- Histogram.cpp   
+ ExtremumGraph.cpp
+ HDData.cpp
+ Histogram.cpp
  JointDistributions.cpp
  Neighborhood.cpp
  Selectivity.cpp
@@ -25,7 +23,7 @@ SET (HDT_SOURCES
 
 INCLUDE_DIRECTORIES(
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/external  
+  ${CMAKE_SOURCE_DIR}/external
   ${HDFILEFORMAT_INCLUDE_DIR}
 )
 
