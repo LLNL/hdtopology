@@ -8,7 +8,6 @@ INCLUDE(${SWIG_USE_FILE})
 
 set(CMAKE_FIND_FRAMEWORK LAST)
 find_package(Python3 COMPONENTS Interpreter Development NumPy)
-#find_package(NumPy REQUIRED )
 
 
 set(CMAKE_VERBOSE_MAKEFILE YES)
@@ -21,15 +20,14 @@ set(SWIG_SRC
        hdtopology.i
 )
 
-
 MESSAGE("PYTHON_EXECUTABLE: " ${Python3_EXECUTABLE})
 MESSAGE("PYTHON_INCLUDE_DIR: " ${Python3_INCLUDE_DIRS})
 MESSAGE("PYTHON_LIBRARIES: " ${Python3_LIBRARIES})
 MESSAGE("PYTHON_NUMPY_INCLUDE: " ${Python3_NumPy_INCLUDE_DIRS})
 
 INCLUDE_DIRECTORIES(
-        ${CMAKE_SOURCE_DIR}/src
-        ${CMAKE_SOURCE_DIR}/python
+        ${CMAKE_SOURCE_DIR}/topology/src
+        ${CMAKE_SOURCE_DIR}/topology/python
         ${Python3_INCLUDE_DIRS}
         ${Python3_NumPy_INCLUDE_DIRS}
         ${HDFILEFORMAT_INCLUDE_DIR}
@@ -49,9 +47,10 @@ else()
 	message("CUDA-Enabled NGL not available")
 endif(NGLCU_FOUND)
 
+# SET(SWIG_MODULE_hdtopology_EXTRA_DEPS typemaps.i)
 
+################ compile and link ###################
 SWIG_ADD_LIBRARY(hdtopology LANGUAGE python SOURCES ${SWIG_SRC})
-# SWIG_ADD_LIBRARY(hdtopology TYPE SHARED LANGUAGE python SOURCES ${SWIG_SRC})
 SWIG_LINK_LIBRARIES(hdtopology ${Python3_LIBRARIES} ${HDFILEFORMAT_LIBRARY} chdtopology)
 
 if (NGLCU_FOUND)
@@ -59,8 +58,7 @@ if (NGLCU_FOUND)
   swig_link_libraries(hdtopology ${NGLCU_LIBRARY})
 endif(NGLCU_FOUND)
 
-
-SET(SWIG_MODULE_hdtopology_EXTRA_DEPS typemaps.i)
+################ install ###################
 
 SET(PKG_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/hdtopology.py

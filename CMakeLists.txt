@@ -4,17 +4,13 @@ project(HDTopology)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake")
 
-find_package(HDFileFormat)
+find_package(HDFileFormat REQUIRED)
 find_package(NGLCu)
-
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 
+option(ENABLE_PYTHON "Enable python binding" On)
 
-OPTION(ENABLE_PYTHON "Enable python binding" On)
-
-ADD_SUBDIRECTORY(src)
-
-IF (ENABLE_PYTHON)
-    ADD_SUBDIRECTORY(python)
-ENDIF()
+add_subdirectory(topology)
+add_subdirectory(ngl)
+# add_subdirectory(preprocessing)
