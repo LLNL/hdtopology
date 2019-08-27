@@ -70,6 +70,7 @@ import_array();
   PyObject *names, *name;
 
   std::vector<std::string> attributes(tmp.dim());
+  fprintf(stderr, "====== tmp length: %ld ====", tmp.dim());
   dtype = PyArray_DTYPE(data_ptr);
   names = dtype->names;
 
@@ -77,11 +78,17 @@ import_array();
         names = PySequence_Fast(names, NULL);
         for (uint32_t i=0;i<tmp.dim();i++) {
           name = PySequence_Fast_GET_ITEM(names, i);
-          attributes[i] = PyString_AsString(name);
+          PyObject* repr = PyObject_Repr(name);
+          PyObject* str = PyUnicode_AsEncodedString(repr, "utf-8", "E");
+          const char *bytes = PyBytes_AS_STRING(str);
+          printf("REPR: %s\n", bytes);
+          attributes[i] = std::string(bytes);
+          //attributes[i] = PyStr_AsString(name); //Python2
         }
       }
 
   tmp.attributes(attributes);
+  $1 = &tmp;
 
   //if (PyArray_TYPE(data_ptr) != NPY_FLOAT32)
   //  SWIG_exception(SWIG_ValueError,"Expected array of float32.");
@@ -98,7 +105,6 @@ import_array();
   tmp.attributes(attributes);
   */
 
-  $1 = &tmp;
 }
 
 %typemap(in) (const Flags*) (Flags tmp){
