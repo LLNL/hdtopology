@@ -186,6 +186,7 @@ bool Histogram::load(HDFileFormat::HistogramHandle &handle){
   inBuffer.setBuffer(mSerializationBuffer);
   std::istream is(&inBuffer);
   this->deserialize(is);
+  return true;
 }
 
 bool Histogram::save(HDFileFormat::HistogramHandle &handle){
@@ -209,6 +210,7 @@ bool Histogram::save(HDFileFormat::HistogramHandle &handle){
   bufferHandle.idString("serializedMetaData");
   bufferHandle.setData(&mSerializationBuffer[0], streamBuffer.outputCount());
   handle.add(bufferHandle);
+  return true;
 }
 
 void Histogram::serialize(std::ostream &output)
