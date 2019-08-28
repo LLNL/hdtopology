@@ -12,11 +12,11 @@
 #include <string>
 #include <unordered_map>
 #include <stdint.h>
-#include <math.h> 
+#include <math.h>
 #include "Histogram.h"
 
 //for writting to file
-#include <HDFileFormat/DistributionHandle.h>
+#include <DistributionHandle.h>
 
 //! Class to hold joint histograms from up to 255 dimensions
 //! and up to 8 way histograms
@@ -51,11 +51,11 @@ public:
                    std::vector<std::pair<float,float> >& ranges,
                    uint32_t resolution);
 
-  //! A general function to create n-d histogram in specified mode 
+  //! A general function to create n-d histogram in specified mode
   void createHistogram(std::vector<std::pair<float,float> >& ranges,
                         uint32_t resolution, uint32_t cubeDim, uint32_t histogramType,  int32_t target_attr);//HistogramType histogramType);
 
-  // //! A general function to create n-d histogram in specified mode 
+  // //! A general function to create n-d histogram in specified mode
   // void createHistogram(std::vector<std::string>& attributes,
   //                  std::vector<std::pair<float,float> >& ranges,
   //                  uint32_t resolution, uint32_t cubeDim, HistogramType histogramType);

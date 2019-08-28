@@ -6,7 +6,7 @@
  */
 
 #include "JointDistributions.h"
-#include <HDFileFormat/HistogramHandle.h>
+#include <HistogramHandle.h>
 #include <cereal/archives/binary.hpp>
 // #include <cereal/archives/xml.hpp>
 #include <cereal/types/unordered_map.hpp>
@@ -82,7 +82,7 @@ int JointDistributions::addHistogram(std::vector<uint8_t>& indices,
     }
 
   }
-  
+
   mHistograms.push_back(Histogram(attributes,indices,ranges,resolution));
   // Now we make sure that we can find this histogram
   mHistogramMap[code] = mHistograms.size()-1;
@@ -92,8 +92,8 @@ int JointDistributions::addHistogram(std::vector<uint8_t>& indices,
 
 void JointDistributions::createHistogram( std::vector<std::pair<float,float> >& ranges,
                                           uint32_t resolution, uint32_t cubeDim, uint32_t histogramType, int32_t target_attr)//HistogramType histogramType)
-{ 
-  //! Right now the Reduced Histogram's resolution decreases by a factor of 2 with increasing dimension for the cube 
+{
+  //! Right now the Reduced Histogram's resolution decreases by a factor of 2 with increasing dimension for the cube
   if(histogramType == REGULAR)
   {
     std::vector<uint32_t> resolutions (cubeDim, resolution);
@@ -114,7 +114,7 @@ void JointDistributions::multiResolutionHistogram(std::vector<std::pair<float,fl
                                                   std::vector<uint32_t>& resolutions, int32_t target_attr)
 {
 
-  // Add all 1D histograms 
+  // Add all 1D histograms
   std::vector<uint8_t> indices(1);
   std::vector<std::pair<float,float> > range(1);
 
@@ -145,7 +145,7 @@ void JointDistributions::multiResolutionHistogram(std::vector<std::pair<float,fl
   }
 
   // Add all 3D histograms, may be used later
-  // ??? 
+  // ???
 
   if((resolutions.size()>2)&&(ranges.size()>2))
   {
@@ -168,7 +168,7 @@ void JointDistributions::multiResolutionHistogram(std::vector<std::pair<float,fl
     }
   }
 
-  // 4D Data Cube 
+  // 4D Data Cube
   if((resolutions.size()>3)&&(ranges.size()>3))
   {
     indices.resize(4);
@@ -191,7 +191,7 @@ void JointDistributions::multiResolutionHistogram(std::vector<std::pair<float,fl
         }
       }
     }
-  }  
+  }
 }
 
 
@@ -249,7 +249,7 @@ bool JointDistributions::peek(const std::vector<std::string>& attributes){
   hIt = mHistogramMap.find(code);
   if (hIt == mHistogramMap.end()) {
     fprintf(stderr,"Could not find histogram for for code %llu \n",code);
-    
+
     return false;
     //assert (false);
   }
@@ -297,7 +297,7 @@ const Histogram& JointDistributions::get(const std::vector<uint8_t>& indices)
 
    for (uint8_t i=0;i<indices.size();i++)
      code += (uint64_t)indices[i] << 4*i;//sizeof(uint8_t)*i;
-  
+
    // std::cout<<"code = "<<code<<"\n";
 
    hIt = mHistogramMap.find(code);

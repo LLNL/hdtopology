@@ -13,7 +13,7 @@
 
 // #define HD_FILE_FORMAT_H
 // #ifdef HD_FILE_FORMAT_H
-#include <HDFileFormat/DataBlockHandle.h>
+#include <DataBlockHandle.h>
 // #endif
 
 
@@ -76,14 +76,13 @@ public:
   ~ExtremumGraphExt() {}
 
   //! Construct an ExtremumGraph from a set of data, a neighborhood graph and the slopes
-  void initialize(const HDData* data,  const Flags* flags, const Neighborhood* edges, bool ascending,
-                  uint32_t max_segments, const ComputeMode mode, uint32_t cube_dim = 2, 
-                  uint32_t resolution = 128, int32_t target_attr = -1, 
+  void initialize(const HDData* data,  const Flags* flags, const Neighborhood* edges, bool ascending, uint32_t max_segments, const ComputeMode mode, uint32_t cube_dim = 2,
+                  uint32_t resolution = 128, int32_t target_attr = -1,
                   std::vector<HistogramType> histogramTypes = std::vector<HistogramType> (1, REGULAR));
 
   void initialize(const HDData* data, const Flags* flags, EdgeIterator& edgeIter, bool ascending,
-                  uint32_t max_segments, const ComputeMode mode, uint32_t cube_dim = 2, 
-                  uint32_t resolution = 128, int32_t target_attr = -1, 
+                  uint32_t max_segments, const ComputeMode mode, uint32_t cube_dim = 2,
+                  uint32_t resolution = 128, int32_t target_attr = -1,
                   std::vector<HistogramType> histogramTypes = std::vector<HistogramType> (1, REGULAR));
 
   //! Return the segmentation for the given persistence
@@ -139,14 +138,14 @@ public:
 
   // ! Query function for getting histogram with correct count, attrs and ext
 
-  std::vector<uint32_t> getHist(uint32_t ext, uint32_t count, std::vector<std::string> attrs, bool func=false, 
-                                std::vector<std::string> dims=std::vector<std::string>(), 
+  std::vector<uint32_t> getHist(uint32_t ext, uint32_t count, std::vector<std::string> attrs, bool func=false,
+                                std::vector<std::string> dims=std::vector<std::string>(),
                                 std::vector<std::vector<float> > ranges=std::vector<std::vector<float> >() );
 
   // ! Query function for getting histogram of the whole dataset
 
-  std::vector<uint32_t> getHist(std::vector<std::string> attrs, bool func=false, 
-                                std::vector<std::string> dims=std::vector<std::string>(), 
+  std::vector<uint32_t> getHist(std::vector<std::string> attrs, bool func=false,
+                                std::vector<std::string> dims=std::vector<std::string>(),
                                 std::vector<std::vector<float> > ranges=std::vector<std::vector<float> >() );
 
   std::vector<uint32_t> getHist(std::string attr1, std::string attr2);
@@ -296,7 +295,7 @@ private:
   void computeSegments(const HDData* data);
 
   //! Compute the histogram information
-  void computeHistograms(const HDData* data, uint32_t cube_dim, uint32_t resolution, 
+  void computeHistograms(const HDData* data, uint32_t cube_dim, uint32_t resolution,
                           std::vector<HistogramType> histogramTypes, int32_t target_attr);
 
   //! Simplify the hierarchy to the given number of extrema. Note that this operation

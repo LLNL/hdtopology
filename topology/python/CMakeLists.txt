@@ -25,6 +25,7 @@ MESSAGE("PYTHON_NUMPY_INCLUDE: " ${Python3_NumPy_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(
         ${CMAKE_SOURCE_DIR}/topology/src
         ${CMAKE_SOURCE_DIR}/topology/python
+        ${CMAKE_SOURCE_DIR}/hdfileformat/src
         ${Python3_INCLUDE_DIRS}
         ${Python3_NumPy_INCLUDE_DIRS}
         ${HDFILEFORMAT_INCLUDE_DIR}

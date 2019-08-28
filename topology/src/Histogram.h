@@ -16,7 +16,7 @@
 #include "HDData.h"
 #include <numeric>
 
-#include <HDFileFormat/HistogramHandle.h>
+#include <HistogramHandle.h>
 
 class Histogram
 {

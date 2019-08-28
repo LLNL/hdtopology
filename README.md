@@ -1,2 +1,23 @@
 # hdtopology
-Topological data analysis library for NDDAV
+Topological data analysis library for NDDAV (n-dimensional data analysis and visualization) system (https://github.com/LLNL/NDDAV.git)
+
+#### Requirements:
+python3, swig3, numpy, cmake (3.12 or up), ANN (Approximate Nearest Neighbor, original repo: https://www.cs.umd.edu/~mount/ANN/, for compiling with CMake: https://github.com/dials/annlib)
+
+High-dimensional file format library for NDDAV: hdfileformat (https://github.com/LLNL/hdfileformat.git, put the hdfileformat and the hdtopology folders in the same parent folder will allow cmake to automatically find hdfileformat include path and library)
+
+The hdtopology library also incorporated the core functionality of the NGL library (developed by Carlos Correa) for empty region graph computation, the full NGL code base can be access at: http://www.ngraph.org/
+
+
+#### Install
+1. Install or compile ANN library.
+
+2. Compile the hdtopology library and python binding:
+```console
+mkdir build
+cd build
+cmake .. -DENABLE_PYTHON=ON -DANN_INCLUDE_DIR=path/to/ann/include -DANN_LIBRARY=path/to/ann/libANN.a
+make install
+```
+
+Released under LLNL-CODE-772013

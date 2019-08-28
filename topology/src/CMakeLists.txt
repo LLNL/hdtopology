@@ -1,7 +1,7 @@
 
 SET (HDT_HEADERS
   EdgeIterator.h
-  HDData.h    
+  HDData.h
   JointDistributions.h
   Neighborhood.h
   ExtremumGraph.h
@@ -24,7 +24,7 @@ SET (HDT_SOURCES
 INCLUDE_DIRECTORIES(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_SOURCE_DIR}/external
-  ${HDFILEFORMAT_INCLUDE_DIR}
+  ${CMAKE_SOURCE_DIR}/hdfileformat/src
 )
 
 if (NGLCU_FOUND)
@@ -33,7 +33,7 @@ endif(NGLCU_FOUND)
 
 
 ADD_LIBRARY(chdtopology STATIC ${HDT_SOURCES} ${HDT_HEADERS})
-target_link_libraries(chdtopology ${HDFILEFORMAT_LIBRARY})
+target_link_libraries(chdtopology hdfileformat)
 
 if (NGLCU_FOUND)
   target_link_libraries(chdtopology ${NGLCU_LIBRARY})

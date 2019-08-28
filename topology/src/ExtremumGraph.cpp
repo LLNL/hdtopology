@@ -9,9 +9,9 @@
 #include <iostream>
 #include <algorithm>
 
-#include <HDFileFormat/DataPointsHandle.h>
-#include <HDFileFormat/DistributionHandle.h>
-#include <HDFileFormat/HistogramHandle.h>
+#include <DataPointsHandle.h>
+#include <DistributionHandle.h>
+#include <HistogramHandle.h>
 
 #include <cereal/archives/binary.hpp>
 //#include <cereal/archives/xml.hpp>
@@ -73,8 +73,8 @@ ExtremumGraphExt::ExtremumGraphExt() : mRange(2)
 }
 void ExtremumGraphExt::initialize(const HDData* data, const Flags* flags, const Neighborhood* edges,
                                   bool ascending, uint32_t max_segments,
-                                  const ComputeMode mode, uint32_t cube_dim, 
-                                  uint32_t resolution, int32_t target_attr, 
+                                  const ComputeMode mode, uint32_t cube_dim,
+                                  uint32_t resolution, int32_t target_attr,
                                   std::vector<HistogramType> histogramTypes)
 {
   //fprintf(stderr,"Number of edges %d\n",edges->size());
@@ -94,7 +94,7 @@ void ExtremumGraphExt::initialize(const HDData* data,
                                   EdgeIterator& edgeIterator,
                                   bool ascending,
                                   uint32_t max_segments,
-                                  const ComputeMode mode, uint32_t cube_dim, 
+                                  const ComputeMode mode, uint32_t cube_dim,
                                   uint32_t resolution, int32_t target_attr,
                                   std::vector<HistogramType> histogramTypes)
 {
@@ -719,7 +719,7 @@ void ExtremumGraphExt::computeSegments(const HDData* data)
 }
 
 
-void ExtremumGraphExt::computeHistograms(const HDData* data, uint32_t cube_dim, uint32_t resolution, 
+void ExtremumGraphExt::computeHistograms(const HDData* data, uint32_t cube_dim, uint32_t resolution,
                                         std::vector<HistogramType> histogramTypes, int32_t target_attr)
 {
   // Example to compute all 1D and 2D Histograms for all segments
@@ -755,12 +755,12 @@ void ExtremumGraphExt::computeHistograms(const HDData* data, uint32_t cube_dim, 
     }
   }
   /////////////////////////////////////////
-  //// Combine for a general function to create histogram 
+  //// Combine for a general function to create histogram
   /////////////////////////////////////////
   // Add all 1D histograms
 
   for (uint32_t k=0;k<mDistributions.size();k++) {
-    for (auto histogramType : histogramTypes) 
+    for (auto histogramType : histogramTypes)
       mDistributions[k].createHistogram(ranges, resolution, cube_dim, (uint32_t)histogramType, target_attr);
   }
 
@@ -821,7 +821,7 @@ void ExtremumGraphExt::computeHistograms(const HDData* data, uint32_t cube_dim, 
 }
 
 std::vector<uint32_t> ExtremumGraphExt::getSelected1D(std::vector<std::string> dims, std::vector<std::vector<float> > ranges, int32_t ext, uint32_t count, int32_t targetIndex){
-  
+
   std::vector<uint32_t> selectedIndex;
   uint32_t r;
   if(ext>0)
@@ -850,11 +850,11 @@ std::vector<uint32_t> ExtremumGraphExt::getHist(uint32_t ext, uint32_t count, st
     {
       selectedIndex.push_back(i);
     }
-  } 
+  }
 
 
   // ! Create vector of attributes to query
-  
+
   // std::vector<std::string> all_attrs = mDistributions[mFuncAttr].getAttr();
   std::vector<std::string> all_attrs = mDistributions[0].getAttr();
 
@@ -862,7 +862,7 @@ std::vector<uint32_t> ExtremumGraphExt::getHist(uint32_t ext, uint32_t count, st
   std::vector<std::string> tar_attrs;
 
   for (uint32_t ii = 0; ii < all_attrs.size(); ii++)
-  { 
+  {
     if (std::find(attrs.begin(), attrs.end(), all_attrs[ii]) != attrs.end())
     {
       tar_attrs.push_back(all_attrs[ii]);
@@ -882,7 +882,7 @@ std::vector<uint32_t> ExtremumGraphExt::getHist(uint32_t ext, uint32_t count, st
   {
     return std::vector<uint32_t>();
   }
-  
+
 }
 
 std::vector<uint32_t> ExtremumGraphExt::getHist(std::vector<std::string> attrs, bool func,
@@ -895,7 +895,7 @@ std::vector<uint32_t> ExtremumGraphExt::getHist(std::vector<std::string> attrs, 
   std::vector<std::string> tar_attrs;
 
   for (uint32_t ii = 0; ii < all_attrs.size(); ii++)
-  { 
+  {
     if (std::find(attrs.begin(), attrs.end(), all_attrs[ii]) != attrs.end())
     {
       tar_attrs.push_back(all_attrs[ii]);
@@ -1243,8 +1243,8 @@ bool ExtremumGraphExt::load(HDFileFormat::DataBlockHandle &handle, bool isInclud
       mFuncAttr = mDistributions[0].getAttr().size()-1;
 
     mCubeDim = cube_dim;
-    
-    // Find the highest resolution for the data cube 
+
+    // Find the highest resolution for the data cube
     uint32_t resolution = mDistributions[0].get(mDistributions[0].getAttr()[mFuncAttr]).resolution();
 
     // std::cout<< "Highest Res in the cube = "<< resolution<<"\n";
