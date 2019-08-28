@@ -39,10 +39,10 @@ if (NGLCU_FOUND)
   target_link_libraries(chdtopology ${NGLCU_LIBRARY})
 endif (NGLCU_FOUND)
 
-INSTALL(FILES ${HDT_HEADERS}
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/include/HDTopology
-)
-
-INSTALL(TARGETS chdtopology
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
-)
+# INSTALL(FILES ${HDT_HEADERS}
+#         DESTINATION ${CMAKE_INSTALL_PREFIX}/include/HDTopology
+# )
+#
+# INSTALL(TARGETS chdtopology
+#         DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+# )

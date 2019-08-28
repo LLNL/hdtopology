@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(HDTopology)
+project(hdtopology)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake")
 
@@ -13,4 +13,4 @@ option(ENABLE_PYTHON "Enable python binding" On)
 add_subdirectory(hdfileformat)
 add_subdirectory(ngl)
 add_subdirectory(topology)
-# add_subdirectory(utilities)
+add_subdirectory(utilities)

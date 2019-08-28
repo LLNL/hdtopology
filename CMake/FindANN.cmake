@@ -12,7 +12,8 @@ IF (ANN_INCLUDE_DIRS)
 ENDIF (ANN_INCLUDE_DIRS)
 
 FIND_PATH( ANN_INCLUDE_DIR ANN/ANN.h
-PATHS "ann_1.1.2/include" "/usr/include" "../ann_1.1.2/include" "../annlib/include" "C:/libs/ANN/include")
+HINTS "ann_1.1.2/include" "/usr/include" "../../ann_1.1.2/include" "../../annlib/include" "../ann_1.1.2/include" "../annlib/include" "C:/libs/ANN/include"
+)
 
 if( WIN32 )
 
@@ -20,7 +21,7 @@ if( WIN32 )
 
  FIND_LIBRARY( ANN_LIBRARY
                NAMES ann.lib
-               PATHS "C:/libs/ANN/lib")
+             HINTS "C:/libs/ANN/lib" "../../ann_1.1.2/lib" "../../annlib/lib")
 
  # Store the library dir. May be used for linking to dll!
  GET_FILENAME_COMPONENT( ANN_LIBRARY_DIR ${ANN_LIBRARY} PATH )
@@ -29,7 +30,7 @@ else (WIN32)
 
 FIND_LIBRARY( ANN_LIBRARY
              NAMES ann ANN
-             PATHS /lib /usr/lib /usr/lib64 /usr/local/lib ann_1.1.2/lib ../ann_1.1.2/lib ../annlib/lib)
+           HINTS "/lib" "/usr/lib" "/usr/lib64" "/usr/local/lib" "ann_1.1.2/lib" "../../ann_1.1.2/lib" "../../annlib/lib" "../ann_1.1.2/lib" "../annlib/lib")
 
 endif( WIN32)
 

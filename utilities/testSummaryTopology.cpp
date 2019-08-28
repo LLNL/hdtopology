@@ -301,8 +301,9 @@ int main(int argc, char **argv)
 
 
   ExtremumGraphExt eg;
-  Flags flags;
-  eg.initialize(&data, &edges, true, 10, ExtremumGraphExt::ComputeMode::HISTOGRAM);
+  Flags *flags = NULL;
+
+  eg.initialize(&data, flags, &edges, true, 10, ExtremumGraphExt::ComputeMode::HISTOGRAM);
 
   t2 = now();
   std::cerr << blue << "Building Extremum Graph with NeighborhoodIterator " << t2-t1 << " s" << def << std::endl;
