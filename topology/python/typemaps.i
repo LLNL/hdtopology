@@ -70,7 +70,6 @@ import_array();
   PyObject *names, *name;
 
   std::vector<std::string> attributes(tmp.dim());
-  fprintf(stderr, "====== tmp length: %ld ====", tmp.dim());
   dtype = PyArray_DTYPE(data_ptr);
   names = dtype->names;
 
@@ -208,12 +207,21 @@ import_array();
   }
 }
 
+
 %typemap(in) uint32_t {
-    $1 = (uint32_t) PyInt_AsLong($input);
+    $1 = (uint32_t) PyLong_AsLong($input);
 }
 
 %typemap(out) uint32_t {
-    $result = PyInt_FromLong((long) $1);
+    $result = PyLong_FromLong((long) $1);
+}
+
+%typemap(in) int32_t {
+	$1 = (int) PyLong_AsLong($input);
+}
+
+%typemap(in) int {
+	$1 = (int) PyLong_AsLong($input);
 }
 
 /*
@@ -225,6 +233,7 @@ import_array();
                                        PyArray_UINT32,($1).data());
  }
 */
+
 
 
 //I'm using a double vector here only because using a float

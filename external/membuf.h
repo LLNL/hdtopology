@@ -122,7 +122,7 @@ private:
     }
 
     int_type overflow(){
-      traits_type::to_int_type(*current_);     //
+      return traits_type::to_int_type(*current_);     //
     }
 
     int_type uflow() {
