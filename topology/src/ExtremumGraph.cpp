@@ -81,7 +81,7 @@ void ExtremumGraphExt::initialize(const HDData* data, const Flags* flags, const 
 
   if(edges){
     NeighborhoodIterator it(*edges);
-    initialize(data, flags,it, ascending, max_segments, mode, cube_dim, resolution, target_attr, histogramTypes);
+    initialize(data, flags, it, ascending, max_segments, mode, cube_dim, resolution, target_attr, histogramTypes);
   }
   else{
     if(data)
@@ -108,15 +108,21 @@ void ExtremumGraphExt::initialize(const HDData* data,
 
   for (uint32_t i=0;i<mFunction.size();i++) {
     // We want to ignore all vertices that have been flagged as invalid
-    if ((*flags)[i]) {
-      mFunction[i] = data->f(i);
+    if(flags){
+        if ((*flags)[i]) {
+          mFunction[i] = data->f(i);
 
-      mRange[0] = std::min(mRange[0],mFunction[i]);
-      mRange[1] = std::max(mRange[1],mFunction[i]);
+          mRange[0] = std::min(mRange[0],mFunction[i]);
+          mRange[1] = std::max(mRange[1],mFunction[i]);
+        }
+    }else{
+        mFunction[i] = data->f(i);
+        mRange[0] = std::min(mRange[0],mFunction[i]);
+        mRange[1] = std::max(mRange[1],mFunction[i]);
     }
   }
 
-  //fprintf(stderr, "function min: %f function max: %f\n", mRange[0], mRange[1]);
+  fprintf(stderr, "function min: %f function max: %f\n", mRange[0], mRange[1]);
 
   mExtrema.clear();
   mSaddles.clear();
@@ -465,10 +471,14 @@ void ExtremumGraphExt::computeSegmentation(const HDData* data, const Flags* flag
 
   //! Initialize the steepest array
   for (i=0;i<data->size();i++) {
-    if ((*flags)[i])
-      mSteepest[i] = i;
-    else
-      mSteepest[i] = LNULL;
+    if(flags){
+        if ((*flags)[i])
+          mSteepest[i] = i;
+        else
+          mSteepest[i] = LNULL;
+    }else{
+        mSteepest[i] = i;
+    }
   }
 
 

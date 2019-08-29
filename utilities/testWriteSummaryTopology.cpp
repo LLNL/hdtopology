@@ -166,18 +166,18 @@ int main(int argc, char **argv)
   timestamp t1 = now();
   timestamp t2;
   CommandLine cl;
-  cl.addArgument("-d", "2", "Number of dimensions", true);
-  cl.addArgument("-c", "1000000", "Number of points", true);
+  cl.addArgument("-d", "2", "Number of dimensions", false);
+  cl.addArgument("-c", "10000", "Number of points", false);
   cl.addArgument("-a", "-1", "Number of attributes", false);
   cl.addArgument("-f", "-1", "Index for function value", false);
   cl.addArgument("-q", "-1", "Query Size for NGLIterator", false);
 
-  cl.addArgument("-k", "-1", "K max", false);
+  cl.addArgument("-k", "500", "K max", false);
   cl.addArgument("-b", "1.0", "Beta", false);
   cl.addArgument("-p", "2.0", "Lp-norm", false);
-  cl.addArgument("-r", "0", "Relaxed", false);
+  cl.addArgument("-r", "1", "Relaxed", false);
   cl.addArgument("-s", "-1", "# of Discretization Steps. Use -1 to disallow discretization.", false);
-  cl.addArgument("-o", "output.hdff", "Output file name", false);
+  cl.addArgument("-o", "summaryTopologyTest.hdff", "Output file name", false);
   bool hasArguments = cl.processArgs(argc, argv);
   if(!hasArguments) {
     fprintf(stderr, "Missing arguments\n");
@@ -280,8 +280,6 @@ int main(int argc, char **argv)
 
   // NGLIterator it(x, N, D, K, relaxed, beta, lp, steps, Q);
   //eg.initialize(&data, it, true, 10, ExtremumGraphExt::ComputeMode::HISTOGRAM);
-
-
 
   Geometry<float>::init(D);   // Initialize NGL for 2-dimensional points
 

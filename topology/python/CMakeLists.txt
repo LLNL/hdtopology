@@ -49,7 +49,7 @@ endif(NGLCU_FOUND)
 
 ################ compile and link ###################
 SWIG_ADD_LIBRARY(hdtopology LANGUAGE python SOURCES ${SWIG_SRC})
-SWIG_LINK_LIBRARIES(hdtopology ${Python3_LIBRARIES} ${HDFILEFORMAT_LIBRARY} chdtopology)
+SWIG_LINK_LIBRARIES(hdtopology ${Python3_LIBRARIES} chdtopology)
 
 if (NGLCU_FOUND)
   include_directories(${NGLCU_INCLUDE_DIR})

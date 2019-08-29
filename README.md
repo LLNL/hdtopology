@@ -8,9 +8,9 @@ The hdtopology library also incorporated the core functionality of the NGL libra
 
 
 #### Install
-1. Install or compile ANN library.
+1. Install (e.g., ```apt-get install libann-dev``` on linux, or ```port install ann``` on mac) or compile ANN library from source.
 
-2. Compile the hdtopology library and python binding:
+2. Compile the hdtopology library and python wrapper:
 ```console
 mkdir build
 cd build
