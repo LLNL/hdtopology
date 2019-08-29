@@ -25,7 +25,7 @@ setuptools.setup(
     version="0.0.2",
     author="Shusen Liu, Peer-Timo Bremer",
     author_email="liu42@llnl.gov, bremer5@llnl.gov",
-    description="File Format Library for NDDAV System",
+    description="Topological Data Analysis Library for NDDAV System",
     install_requires=['numpy>=1.17', 'hdff', 'ngl'],
     url="https://github.com/LLNL/hdtopology",
     keywords="Topological Data Analysis, High-Dimensional Data",
