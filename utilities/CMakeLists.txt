@@ -27,4 +27,17 @@ else()
 
   ADD_EXECUTABLE(testWriteSummaryTopology testWriteSummaryTopology.cpp)
   TARGET_LINK_LIBRARIES(testWriteSummaryTopology ${ANN_LIBRARY} chdtopology hdfileformat)
+
+  SET(INSTALL_FILES
+      ${CMAKE_SOURCE_DIR}/utilities/testReadSummaryTopology.py
+      ${CMAKE_SOURCE_DIR}/utilities/testWriteSummaryTopology.py
+
+  )
+
+  INSTALL(FILES ${INSTALL_FILES}
+          DESTINATION ${CMAKE_BINARY_DIR}
+  )
+  INSTALL(TARGETS testWriteSummaryTopology testReadSummaryTopology
+        DESTINATION ${CMAKE_BINARY_DIR}
+  )
 endif()
