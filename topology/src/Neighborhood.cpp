@@ -3,6 +3,7 @@
 #include <cstring> //for memcpy decleration
 #include "Neighborhood.h"
 
+#ifndef _MSC_VER
 uint32_t Neighborhood::load_neighborhood(const char* filename)
 {
   std::vector<uint32_t> edges;
@@ -62,3 +63,5 @@ uint32_t Neighborhood::load_neighborhood(const char* filename)
 
   return mSize;
 }
+
+#endif

@@ -2,6 +2,7 @@
 #include <map>
 #include <cstdio>
 #include <cstring>
+#include <algorithm>
 
 #include "getNeighborGraph.h"
 
