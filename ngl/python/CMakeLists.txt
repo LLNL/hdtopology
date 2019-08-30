@@ -35,7 +35,7 @@ INCLUDE_DIRECTORIES(
 set_property(SOURCE ${SWIG_SRC} PROPERTY CPLUSPLUS ON)
 
 ################ compile and link ###################
-SWIG_ADD_LIBRARY(ngl LANGUAGE python SOURCES ${SWIG_SRC} ${SWIG_CC_SRC})
+SWIG_ADD_LIBRARY(ngl TYPE MODULE LANGUAGE python SOURCES ${SWIG_SRC} ${SWIG_CC_SRC})
 SWIG_LINK_LIBRARIES(ngl ${Python3_LIBRARIES} ${ANN_LIBRARY})
 
 ############### install #################
@@ -51,3 +51,13 @@ INSTALL(FILES ${PKG_FILES}
 INSTALL(TARGETS ngl
         DESTINATION ${Python3_SITEARCH}/ngl
 )
+
+if(ENABLE_PACKAGING)
+    install(FILES ${PKG_FILES}
+            DESTINATION ${CMAKE_SOURCE_DIR}/deploy/ngl/ngl
+    )
+
+    install(TARGETS ngl
+            DESTINATION ${CMAKE_SOURCE_DIR}/deploy/ngl/ngl
+    )
+endif()

@@ -28,22 +28,32 @@ INCLUDE_DIRECTORIES(
 
 SET_SOURCE_FILES_PROPERTIES(${SWIG_SRC} PROPERTIES CPLUSPLUS ON)
 
-SWIG_ADD_LIBRARY(hdff LANGUAGE python SOURCES ${SWIG_SRC})
+SWIG_ADD_LIBRARY(hdff TYPE MODULE LANGUAGE python SOURCES ${SWIG_SRC})
 SWIG_LINK_LIBRARIES(hdff ${Python3_LIBRARIES} hdfileformat)
 
-SET(SWIG_MODULE_hdff_EXTRA_DEPS typemaps.i)
+set(SWIG_MODULE_hdff_EXTRA_DEPS typemaps.i)
 
 
-SET(PKG_FILES
+set(PKG_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/hdff.py
     ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py
     )
 
 
-INSTALL(FILES ${PKG_FILES}
+install(FILES ${PKG_FILES}
         DESTINATION ${Python3_SITEARCH}/hdff
 )
 
-INSTALL(TARGETS hdff
+install(TARGETS hdff
         DESTINATION ${Python3_SITEARCH}/hdff
 )
+
+if(ENABLE_PACKAGING)
+    install(FILES ${PKG_FILES}
+            DESTINATION ${CMAKE_SOURCE_DIR}/deploy/hdff/hdff
+    )
+
+    install(TARGETS hdff
+            DESTINATION ${CMAKE_SOURCE_DIR}/deploy/hdff/hdff
+    )
+endif()

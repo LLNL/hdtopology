@@ -16,6 +16,7 @@ if(WIN32)
 endif()
 
 option(ENABLE_PYTHON "Enable python binding" On)
+option(ENABLE_PACKAGING "Enable packaging for PyPI" Off)
 
 add_subdirectory(hdfileformat)
 add_subdirectory(ngl)

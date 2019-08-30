@@ -48,7 +48,7 @@ endif(NGLCU_FOUND)
 # SET(SWIG_MODULE_hdtopology_EXTRA_DEPS typemaps.i)
 
 ################ compile and link ###################
-SWIG_ADD_LIBRARY(hdtopology LANGUAGE python SOURCES ${SWIG_SRC})
+SWIG_ADD_LIBRARY(hdtopology TYPE MODULE LANGUAGE python SOURCES ${SWIG_SRC})
 SWIG_LINK_LIBRARIES(hdtopology ${Python3_LIBRARIES} chdtopology)
 
 if (NGLCU_FOUND)
@@ -70,3 +70,13 @@ INSTALL(FILES ${PKG_FILES}
 INSTALL(TARGETS hdtopology
         DESTINATION ${Python3_SITEARCH}/hdtopology
 )
+
+if(ENABLE_PACKAGING)
+    install(FILES ${PKG_FILES}
+            DESTINATION ${CMAKE_SOURCE_DIR}/deploy/hdtopology/hdtopology
+    )
+
+    install(TARGETS hdtopology
+            DESTINATION ${CMAKE_SOURCE_DIR}/deploy/hdtopology/hdtopology
+    )
+endif()
