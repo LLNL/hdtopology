@@ -36,9 +36,7 @@ public:
   void size(uint32_t s) {mSize = s;}
   void setLength(float* l) {mLength = l;}
 
-#ifndef _MSC_VER
   uint32_t load_neighborhood(const char* filename);
-#endif
 
 private:
 

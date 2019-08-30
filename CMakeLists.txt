@@ -9,6 +9,12 @@ find_package(NGLCu)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 
+if(WIN32)
+  set(CMAKE_SHARED_LINKER_FLAGS "/FORCE:MULTIPLE")
+  set(CMAKE_MODULE_LINKER_FLAGS "/FORCE:MULTIPLE")
+  set(CMAKE_EXE_LINKER_FLAGS "/FORCE:MULTIPLE")
+endif()
+
 option(ENABLE_PYTHON "Enable python binding" On)
 
 add_subdirectory(hdfileformat)

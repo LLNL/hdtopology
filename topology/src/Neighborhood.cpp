@@ -1,44 +1,61 @@
 #include <cstdio>
+#include <fstream>
 #include <cassert>
+#include <string>
 #include <cstring> //for memcpy decleration
 #include "Neighborhood.h"
 
-#ifndef _MSC_VER
 uint32_t Neighborhood::load_neighborhood(const char* filename)
 {
   std::vector<uint32_t> edges;
   std::vector<float> length;
-  FILE* input = fopen(filename,"r");
+
+  std::ifstream fin(filename);
+  //FILE* input = fopen(filename,"r");
+
   uint32_t e[2];
-  char* line = NULL;
+  //char* line = NULL;
   size_t linecap = 0;
   float f;
+  std::string strline;
   
-  getline(&line, &linecap, input);
+  std::getline(fin, strline);
+  const char* line = strline.c_str();
+
+  //getline(&line, &linecap, input); //POSIX only
 
   if (sscanf(line,"%d %d %f",e,e+1,&f) == 2) {
     edges.push_back(e[0]);
     edges.push_back(e[1]);
 
-    while (fscanf(input,"%d %d", e,e+1) != EOF) {
-      edges.push_back(e[0]);
-      edges.push_back(e[1]);
-    }
+	while (fin >> e[0] && fin >> e[1]) {
+		edges.push_back(e[0]);
+		edges.push_back(e[1]);
+	}
+    //while (fscanf(input,"%d %d", e,e+1) != EOF) {
+    //  edges.push_back(e[0]);
+    //  edges.push_back(e[1]);
+    //}
   }
   else {
     edges.push_back(e[0]);
     edges.push_back(e[1]);
     length.push_back(f);
 
-
-    while (fscanf(input,"%d %d %f", e,e+1,&f) != EOF) {
-      edges.push_back(e[0]);
-      edges.push_back(e[1]);
-      length.push_back(f);
-    }
+	while (fin >> e[0] && fin >> e[1] && fin >> f) {
+		edges.push_back(e[0]);
+		edges.push_back(e[1]);
+		length.push_back(f);
+	}
+    //while (fscanf(input,"%d %d %f", e,e+1,&f) != EOF) {
+    //  edges.push_back(e[0]);
+    //  edges.push_back(e[1]);
+    //  length.push_back(f);
+    //}
   }
       
-  fclose(input);
+  //fclose(input);
+  fin.close();
 
   if (!length.empty())
     assert (edges.size() == 2*length.size());
@@ -63,5 +80,3 @@ uint32_t Neighborhood::load_neighborhood(const char* filename)
 
   return mSize;
 }
-
-#endif
