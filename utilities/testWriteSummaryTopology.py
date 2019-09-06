@@ -20,7 +20,7 @@ def ackley(domain, d=3):
         Sum = Sum - np.exp(-0.2) * np.sqrt(np.power(theta1, 2) + np.power(theta2, 2)) + 3 * (np.cos(2 * theta1) + np.sin(2 * theta2));
 
     Sum = np.squeeze(np.array(Sum.T))
-    print(Sum.shape)
+    # print(Sum.shape)
     return Sum
 
 f = ackley(sample)
@@ -29,26 +29,19 @@ method = "RelaxedGabriel"
 max_neighbors = 150
 beta = 0.75
 
+### provide recarray for data input ###
+data = np.concatenate((sample, np.matrix(f).T), axis=1).astype('f')
+names = ['X1', 'X2', 'X3', 'f']
+types = ['f4']*(d+1)
+data = data.view(dtype=list(zip(names,types)) ).view(np.recarray)
+print(data)
+### provide array of unint32 for the edges
 edges = ngl.getSymmetricNeighborGraph(method, sample, max_neighbors,beta)
-
-data = hdt.HDData()
-data.size(n)
-# dimension of the domain
-data.dim(d)
-# function is scalar
-data.attr(d+1)
-# index of the f among all attributes
-data.func(d)
-# data.attributes(["X1", "X2", "X3", "f"])
-arrayData = np.concatenate((sample, np.matrix(f).T), axis=1).astype('f')
-# data.data(arrayData)
-
-neighbors = hdt.Neighborhood(edges, len(edges))
-
+print(edges, type(edges), edges.dtype)
 ### compute topology
 eg = hdt.ExtremumGraphExt()
 flag_array = np.array([0],dtype=np.uint8)
-eg.initialize(data,flag_array,neighbors,False,10,2)
+eg.initialize(data, flag_array, edges, False,10,2)
 
 mc = DataBlockHandle()
 mc.idString("TDA");

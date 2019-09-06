@@ -13,11 +13,8 @@ public:
   Neighborhood(uint32_t* data, uint32_t s) : mData(data), mSize(s), mLength(NULL) {}
   ~Neighborhood() {}
 
-#ifndef SWIG
   uint32_t* operator[](uint32_t i) {return mData + 2*i;}
-
   const uint32_t* operator[](uint32_t i) const {return mData + 2*i;}
-#endif
 
   uint32_t e(uint32_t i, uint32_t k) const {return mData[2*i + k];}
 

@@ -16,18 +16,18 @@ import_array();
 %}
 
 
+// on the python side the Neighborhood should be a numpy array of uint32_t
 %typemap(in) (const Neighborhood* edges) (Neighborhood neigh){
 
-  if (PyObject_HasAttrString($input,"edges") == 0)
-    SWIG_exception(SWIG_ValueError,"Expected Neighborhood object.");
-
+  /*
   PyArrayObject* edges = PyArray_GETCONTIGUOUS((PyArrayObject*)PyObject_GetAttrString($input,"edges"));
 
   if (PyArray_TYPE(edges) != NPY_UINT32)
     SWIG_exception(SWIG_ValueError,"Expected list of uint32_t edges.");
+  */
 
-  neigh.data((uint32_t*)PyArray_DATA(edges));
-  neigh.size(PyArray_DIM(edges,0));
+  neigh.data((uint32_t*)PyArray_DATA($input));
+  neigh.size(PyArray_DIM($input,0));
 
 
   if (PyObject_HasAttrString($input,"length") != 0) {
@@ -45,12 +45,7 @@ import_array();
   $1 = &neigh;
 }
 
-// typecheck helps decode this as a parameter correctly when used in overloaded
-// function signatures
-%typemap(typecheck) const Neighborhood* {
-    $1 = PyObject_HasAttrString($input,"edges") ? 1 : 0;
-}
-
+// on the python side, the HDData should be recarray
 %typemap(in) (const HDData*) (HDData tmp){
 
   //if (PyObject_HasAttrString($input,"attributes") == 0)
@@ -112,6 +107,10 @@ import_array();
 // typecheck helps decode this as a parameter correctly when used in overloaded
 // function signatures
 %typemap(typecheck) const HDData* {
+    $1 = PyArray_Check($input) ? 1 : 0;
+}
+
+%typemap(typecheck) const Neighborhood* {
     $1 = PyArray_Check($input) ? 1 : 0;
 }
 
@@ -186,6 +185,7 @@ import_array();
     $1 = (uint32_t) PyLong_AsLong($input);
 }
 
+/*
 %typemap(out) uint32_t {
     $result = PyLong_FromLong((long) $1);
 }
@@ -197,6 +197,7 @@ import_array();
 %typemap(in) int {
 	$1 = (int) PyLong_AsLong($input);
 }
+*/
 
 /*
 %typemap(out) Histogram {

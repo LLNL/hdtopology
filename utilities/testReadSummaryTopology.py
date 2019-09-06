@@ -1,5 +1,5 @@
 from hdff import *
-from hdtopology import hdt
+import hdtopology as hdt
 
 filename = "summaryTopologyTest.hdff"
 collection = DataCollectionHandle()
