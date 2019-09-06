@@ -4,6 +4,7 @@
 %include "ExtremumGraph.i"
 %include "Flags.i"
 %include "Neighborhood.i"
+%include "HDData.i"
 #ifdef NGLCU_AVAILABLE
     %include "NGLIterator.i"
 #endif

@@ -15,6 +15,7 @@
 import_array();
 %}
 
+
 %typemap(in) (const Neighborhood* edges) (Neighborhood neigh){
 
   if (PyObject_HasAttrString($input,"edges") == 0)
@@ -82,7 +83,6 @@ import_array();
           const char *bytes = PyBytes_AS_STRING(str);
           printf("REPR: %s\n", bytes);
           attributes[i] = std::string(bytes);
-          //attributes[i] = PyStr_AsString(name); //Python2
         }
       }
 
@@ -91,18 +91,6 @@ import_array();
 
   //if (PyArray_TYPE(data_ptr) != NPY_FLOAT32)
   //  SWIG_exception(SWIG_ValueError,"Expected array of float32.");
-
-
-  /*
-  std::vector<std::string> attributes(tmp.dim());
-  for (uint32_t i=0;i<tmp.dim();i++) {
-    PyObject *attr = (PyObject*)PyArray_GETITEM(attr_ptr,PyArray_GETPTR2(attr_ptr,0,i));
-    //std::cout<<std::string(PyString_AsString(attr));
-    attributes[i] = std::string(PyString_AsString(attr));
-  }
-
-  tmp.attributes(attributes);
-  */
 
 }
 
@@ -137,21 +125,7 @@ import_array();
     }
 }
 
-/* need alternative for py3
-%typemap(in) (FILE*) (FILE* tmp) {
-
-  if (!PyFile_Check($input)) //on work in py2
-    SWIG_exception(SWIG_ValueError,"Expected file object.");
-
-  tmp = PyFile_AsFile($input); //on work in py2
-
-  $1 = tmp;
- }
-*/
-
 %apply const HDData* {const HDFunction*};
-
-
 
 %typemap(out) std::vector<uint32_t> {
 
