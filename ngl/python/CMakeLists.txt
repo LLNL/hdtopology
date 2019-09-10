@@ -36,6 +36,7 @@ set_property(SOURCE ${SWIG_SRC} PROPERTY CPLUSPLUS ON)
 
 ################ compile and link ###################
 SWIG_ADD_LIBRARY(ngl TYPE MODULE LANGUAGE python SOURCES ${SWIG_SRC} ${SWIG_CC_SRC})
+# target_compile_definitions(ngl PRIVATE Py_LIMITED_API)
 SWIG_LINK_LIBRARIES(ngl ${Python3_LIBRARIES} ${ANN_LIBRARY})
 
 ############### install #################

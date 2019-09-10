@@ -14,3 +14,7 @@ cube_dim = 2
 eg.load(handle, isIncludeFunctionIndexInfo, cube_dim)
 
 ##### test query ######
+attrs = eg.getJoint().getAttr()
+print("Attrs:", attrs)
+hist = eg.getHist(attrs[:2])
+print("Histogram Bin Value Range:", hist.min(), hist.max())
