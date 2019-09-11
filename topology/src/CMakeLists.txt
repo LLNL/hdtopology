@@ -39,6 +39,7 @@ if (NGLCU_FOUND)
   target_link_libraries(chdtopology ${NGLCU_LIBRARY})
 endif (NGLCU_FOUND)
 
+# for using hdtopology as a c++ library
 # INSTALL(FILES ${HDT_HEADERS}
 #         DESTINATION ${CMAKE_INSTALL_PREFIX}/include/HDTopology
 # )

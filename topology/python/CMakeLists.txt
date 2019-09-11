@@ -9,9 +9,7 @@ INCLUDE(${SWIG_USE_FILE})
 set(CMAKE_FIND_FRAMEWORK LAST)
 find_package(Python3 COMPONENTS Interpreter Development NumPy)
 
-
 set(CMAKE_VERBOSE_MAKEFILE YES)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 
 set(SWIG_SRC
        hdtopology.i

@@ -6,16 +6,9 @@ FIND_PACKAGE(SWIG REQUIRED)
 
 INCLUDE(${SWIG_USE_FILE})
 
-# IF (NOT PYTHON_EXECUTABLE)
-#    INCLUDE(FindPythonInterp)
-# ENDIF (NOT PYTHON_EXECUTABLE)
-
 set(CMAKE_FIND_FRAMEWORK LAST)
 find_package(Python3 COMPONENTS Interpreter Development NumPy)
 
-# MESSAGE("ANN_INCLUDE_DIR: " ${ANN_INCLUDE_DIR})
-
-# SET(CMAKE_SWIG_FLAGS "")
 SET(SWIG_SRC
        ngl.i
 )
@@ -36,7 +29,6 @@ set_property(SOURCE ${SWIG_SRC} PROPERTY CPLUSPLUS ON)
 
 ################ compile and link ###################
 SWIG_ADD_LIBRARY(ngl TYPE MODULE LANGUAGE python SOURCES ${SWIG_SRC} ${SWIG_CC_SRC})
-# target_compile_definitions(ngl PRIVATE Py_LIMITED_API)
 SWIG_LINK_LIBRARIES(ngl ${Python3_LIBRARIES} ${ANN_LIBRARY})
 
 ############### install #################

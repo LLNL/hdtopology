@@ -31,7 +31,6 @@ else()
   SET(INSTALL_FILES
       ${CMAKE_SOURCE_DIR}/utilities/testReadSummaryTopology.py
       ${CMAKE_SOURCE_DIR}/utilities/testWriteSummaryTopology.py
-
   )
 
   INSTALL(FILES ${INSTALL_FILES}
