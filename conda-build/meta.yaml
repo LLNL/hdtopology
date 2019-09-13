@@ -1,0 +1,36 @@
+{% set version = "0.0.1" %}
+
+package:
+  name: hdtopology
+  version: {{ version }}
+
+source:
+  path: ../
+  # git_url: https://github.com/LLNL/hdtopology.git
+  # fn: hdtopology-0.0.1.tar.bz2
+  #url: http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8.14/src/hdf5-1.8.14.tar.bz2
+  #md5: 719df6d46eea52e42dd97d59dcbf5311
+
+build:
+  number: 0
+  rpaths:
+    - lib/
+    - lib/R/lib/
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - ann
+    - cmake
+    - swig
+  run:
+    - python
+    - numpy
+
+
+about:
+  home: https://github.com/LLNL/hdtopology
+  license: BSD-3-Clause
+  license_family: BSD
+  summary: 'Topological data analysis library of NDDAV'
