@@ -14,8 +14,8 @@ source:
 build:
   number: 0
   rpaths:
-    - lib/
-    - lib/R/lib/
+    - /usr/local/lib/
+    - /usr/lib/
 
 requirements:
   build:
