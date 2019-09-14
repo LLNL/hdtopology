@@ -12,12 +12,15 @@ with open("README.md", "r") as fh:
 binaryInstallPostfix = []
 if is_mac:
     binaryInstallPostfix.append('*.so')
+    binaryInstallPostfix.append('*.dylib')
 elif is_ubuntu:
     binaryInstallPostfix.append('*.so')
 elif is_windows:
     binaryInstallPostfix.append('*.dll')
+    binaryInstallPostfix.append('*.pyd')
 else:
     binaryInstallPostfix.append('*.so')
+    binaryInstallPostfix.append('*.dylib')
 
 try:
     from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
@@ -30,7 +33,7 @@ except ImportError:
 
 setuptools.setup(
     name="hdtopology",
-    version="0.0.5",
+    version="0.0.0",
     author="Shusen Liu, Peer-Timo Bremer",
     author_email="liu42@llnl.gov, bremer5@llnl.gov",
     description="Topological Data Analysis Library for NDDAV System",

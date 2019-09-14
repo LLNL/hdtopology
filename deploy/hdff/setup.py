@@ -12,10 +12,12 @@ with open("README.md", "r") as fh:
 binaryInstallPostfix = []
 if is_mac:
     binaryInstallPostfix.append('*.so')
+    binaryInstallPostfix.append('*.dylib')
 elif is_ubuntu:
     binaryInstallPostfix.append('*.so')
 elif is_windows:
     binaryInstallPostfix.append('*.dll')
+    binaryInstallPostfix.append('*.pyd')
 else:
     binaryInstallPostfix.append('*.so')
 
@@ -30,11 +32,10 @@ except ImportError:
 
 setuptools.setup(
     name="hdff",
-    version="0.0.3",
+    version="0.0.0",
     author="Shusen Liu, Peer-Timo Bremer",
     author_email="liu42@llnl.gov, bremer5@llnl.gov",
     description="File Format Library for NDDAV System",
-    # install_requires=['numpy>=1.17'],
     url="https://github.com/LLNL/hdtopology",
     keywords="File Format, High-Dimensional Data",
     long_description=long_description,

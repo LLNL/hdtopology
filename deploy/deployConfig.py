@@ -146,23 +146,10 @@ class DeployUtils:
 
 
 
-class AppleDeploy:
+class RpathDeploy:
 
     """
-    see https://gitlab.kitware.com/cmake/community/wikis/doc/cmake/RPATH-handling
-
-    NOTE: !!!! DYLD_LIBRARY_PATH seems to be disabled in Python dlopen for security reasons  !!!!
-    (*) DYLD_LIBRARY_PATH - an environment variable which holds a list of directories
-    (*) RPATH - a list of directories which is linked into the executable.
-        These can contain @loader_path and @executable_path.
-        To see the rpath type:
-    (*) builtin directories - /lib /usr/lib
-    (*) DYLD_FALLBACK_LIBRARY_PATH - an environment variable which holds a list of directories
-    To check :
-        otool -L libname.dylib
-        otool -l libVisusGui.dylib  | grep -i "rpath"
-    To debug loading
-    DYLD_PRINT_LIBRARIES=1 QT_DEBUG_PLUGINS=1 visusviewer.app/Contents/MacOS/visusviewer
+     reconfigure the rpath to make the dynamic library more portable
     """
 
     # constructor
@@ -267,12 +254,23 @@ class AppleDeploy:
     def customizedDeploy(self):
         for filename in self.__findAllBinaries():
             print(filename)
-            DeployUtils.ExecuteCommand(['install_name_tool','-change', "/Users/liu42/homebrew/opt/python/Frameworks/Python.framework/Versions/3.7/Python" ,"@rpath/"+ "libpython3.7m.dylib",filename])
+            if APPLE:
+                #FIXME temp fix when path path is used instead rpath in the dynamic library
+                DeployUtils.ExecuteCommand(['install_name_tool','-change', "/Users/liu42/homebrew/opt/python/Frameworks/Python.framework/Versions/3.7/Python" ,"@rpath/"+ "libpython3.7m.dylib",filename])
 
-            DeployUtils.ExecuteCommand(['install_name_tool','-add_rpath','@loader_path/../lib',filename])
-            DeployUtils.ExecuteCommand(['install_name_tool','-add_rpath','@loader_path/../../lib',filename])
-            DeployUtils.ExecuteCommand(['install_name_tool','-add_rpath','@loader_path/../../../',filename])
-            DeployUtils.ExecuteCommand(['install_name_tool','-add_rpath','@loader_path/../../../../Cellar/python/3.7.4/Frameworks/Python.framework/Versions/3.7/lib',filename])
+                DeployUtils.ExecuteCommand(['install_name_tool','-add_rpath','@loader_path/',filename])
+                DeployUtils.ExecuteCommand(['install_name_tool','-add_rpath','@loader_path/../lib',filename])
+                DeployUtils.ExecuteCommand(['install_name_tool','-add_rpath','@loader_path/../../lib',filename])
+                DeployUtils.ExecuteCommand(['install_name_tool','-add_rpath','@loader_path/../../../',filename])
+                DeployUtils.ExecuteCommand(['install_name_tool','-add_rpath','@loader_path/../../../../Cellar/python/3.7.4/Frameworks/Python.framework/Versions/3.7/lib',filename])
+                DeployUtils.ExecuteCommand(['install_name_tool','-add_rpath','@loader_path/../../../../Cellar/python/3.7.4_1/Frameworks/Python.framework/Versions/3.7/lib',filename])
+                DeployUtils.ExecuteCommand(['install_name_tool','-add_rpath','@loader_path/../../../../Cellar/python/3.7.4_2/Frameworks/Python.framework/Versions/3.7/lib',filename])
+
+            elif LINUX:
+                listPath = ['$ORIGIN/']
+                listPath.append('/usr/lib/x86_64-linux-gnu/')
+                DeployUtils.ExecuteCommand(['patchelf','--set-rpath', ":".join(v),filename])
+
 
     def copyExternalDependenciesAndFixRPaths(self):
 
@@ -326,4 +324,4 @@ class AppleDeploy:
         for filename in self.__findAllBinaries():
             DeployUtils.ExecuteCommand(["install_name_tool","-add_rpath",value,filename])
 
-AppleDeploy().customizedDeploy()
+RpathDeploy().customizedDeploy()
