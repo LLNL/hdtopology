@@ -30,7 +30,7 @@ except ImportError:
 
 setuptools.setup(
     name="ngl",
-    version="0.0.1",
+    version="0.0.3",
     author="Shusen Liu, Peer-Timo Bremer",
     author_email="liu42@llnl.gov, bremer5@llnl.gov",
     description="A wrapper library for the C++ NGL library (http://www.ngraph.org/)",

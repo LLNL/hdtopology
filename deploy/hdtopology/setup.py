@@ -30,11 +30,11 @@ except ImportError:
 
 setuptools.setup(
     name="hdtopology",
-    version="0.0.3",
+    version="0.0.5",
     author="Shusen Liu, Peer-Timo Bremer",
     author_email="liu42@llnl.gov, bremer5@llnl.gov",
     description="Topological Data Analysis Library for NDDAV System",
-    install_requires=['numpy>=1.14', 'hdff', 'ngl'],
+    install_requires=['numpy>=1.16', 'hdff', 'ngl'],
     url="https://github.com/LLNL/hdtopology",
     keywords="Topological Data Analysis, High-Dimensional Data",
     long_description=long_description,
