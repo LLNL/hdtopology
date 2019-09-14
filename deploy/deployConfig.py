@@ -29,6 +29,14 @@ class DeployUtils:
         print("# Executing command: ",cmd)
         return subprocess.call(cmd, shell=False)
 
+    @staticmethod
+    def ExecuteCommandReturnOutput(cmd):
+        print("# Executing command: ", cmd)
+
+        out = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        stdout,stderr = out.communicate()
+        return stdout, stderr
+
     # GetCommandOutput
     @staticmethod
     def GetCommandOutput(cmd):
@@ -252,11 +260,31 @@ class RpathDeploy:
 
 
     def customizedDeploy(self):
+        print("All dynamic libraries: ", self.__findAllBinaries())
         for filename in self.__findAllBinaries():
-            print(filename)
             if APPLE:
-                #FIXME temp fix when path path is used instead rpath in the dynamic library
-                DeployUtils.ExecuteCommand(['install_name_tool','-change', "/Users/liu42/homebrew/opt/python/Frameworks/Python.framework/Versions/3.7/Python" ,"@rpath/"+ "libpython3.7m.dylib",filename])
+                # try:
+                #     #FIXME temp fix when path path is used instead rpath in the dynamic library
+                #     output, _ = DeployUtils.ExecuteCommandReturnOutput(['otool', '-l', filename])
+                #     outputList = str(output).split("\\n")
+                #     pythonPath = [x for x in outputList if "python" in x]
+                #     print("pythonPath", pythonPath)
+                #     pythonPathName = pythonPath[0].split()[1]
+                #     print("pythonPathName", pythonPathName)
+                #     DeployUtils.ExecuteCommand(['install_name_tool','-change', pythonPathName ,"@rpath/"+ "libpython3.7m.dylib",filename])
+                # except Exception as e:
+                #     print(e)
+                #     print("python dylib is already linked as a rpath!")
+
+                print(filename)
+                output, _ = DeployUtils.ExecuteCommandReturnOutput(['otool', '-l', filename])
+                outputList = str(output).split("\\n")
+                # print("outputList", outputList)
+                pythonPath = [x for x in outputList if "Python.framework" in x]
+                print("pythonPath", pythonPath)
+                pythonPathName = pythonPath[0].split()[1]
+                print("pythonPathName", pythonPathName)
+                DeployUtils.ExecuteCommand(['install_name_tool','-change', pythonPathName ,"@rpath/"+ "libpython3.7m.dylib",filename])
 
                 DeployUtils.ExecuteCommand(['install_name_tool','-add_rpath','@loader_path/',filename])
                 DeployUtils.ExecuteCommand(['install_name_tool','-add_rpath','@loader_path/../lib',filename])
@@ -265,7 +293,6 @@ class RpathDeploy:
                 DeployUtils.ExecuteCommand(['install_name_tool','-add_rpath','@loader_path/../../../../Cellar/python/3.7.4/Frameworks/Python.framework/Versions/3.7/lib',filename])
                 DeployUtils.ExecuteCommand(['install_name_tool','-add_rpath','@loader_path/../../../../Cellar/python/3.7.4_1/Frameworks/Python.framework/Versions/3.7/lib',filename])
                 DeployUtils.ExecuteCommand(['install_name_tool','-add_rpath','@loader_path/../../../../Cellar/python/3.7.4_2/Frameworks/Python.framework/Versions/3.7/lib',filename])
-
             elif LINUX:
                 listPath = ['$ORIGIN/']
                 listPath.append('/usr/lib/x86_64-linux-gnu/')
