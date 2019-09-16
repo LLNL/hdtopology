@@ -29,7 +29,14 @@ set_property(SOURCE ${SWIG_SRC} PROPERTY CPLUSPLUS ON)
 
 ################ compile and link ###################
 SWIG_ADD_LIBRARY(ngl TYPE MODULE LANGUAGE python SOURCES ${SWIG_SRC} ${SWIG_CC_SRC})
-SWIG_LINK_LIBRARIES(ngl ${Python3_LIBRARIES} ${ANN_LIBRARY})
+SWIG_LINK_LIBRARIES(ngl ${ANN_LIBRARY})
+# SWIG_LINK_LIBRARIES(ngl ${Python3_LIBRARIES} ${ANN_LIBRARY})
+
+if (APPLE)
+  set_target_properties(ngl PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+else ()
+  set_target_properties(ngl PROPERTIES LINK_FLAGS "-Wl,--unresolved-symbols=ignore-all")
+endif()
 
 ############### install #################
 SET(PKG_FILES

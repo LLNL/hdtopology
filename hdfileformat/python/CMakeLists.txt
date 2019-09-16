@@ -29,7 +29,14 @@ INCLUDE_DIRECTORIES(
 SET_SOURCE_FILES_PROPERTIES(${SWIG_SRC} PROPERTIES CPLUSPLUS ON)
 
 SWIG_ADD_LIBRARY(hdff TYPE MODULE LANGUAGE python SOURCES ${SWIG_SRC})
-SWIG_LINK_LIBRARIES(hdff ${Python3_LIBRARIES} hdfileformat)
+SWIG_LINK_LIBRARIES(hdff hdfileformat)
+# SWIG_LINK_LIBRARIES(hdff ${Python3_LIBRARIES} hdfileformat)
+
+if (APPLE)
+  set_target_properties(hdff PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+else ()
+  set_target_properties(hdff PROPERTIES LINK_FLAGS "-Wl,--unresolved-symbols=ignore-all")
+endif()
 
 set(SWIG_MODULE_hdff_EXTRA_DEPS typemaps.i)
 
