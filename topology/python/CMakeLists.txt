@@ -48,11 +48,10 @@ endif(NGLCU_FOUND)
 ################ compile and link ###################
 SWIG_ADD_LIBRARY(hdtopology TYPE MODULE LANGUAGE python SOURCES ${SWIG_SRC})
 SWIG_LINK_LIBRARIES(hdtopology chdtopology)
-# SWIG_LINK_LIBRARIES(hdtopology ${Python3_LIBRARIES} chdtopology)
 
 if (APPLE)
   set_target_properties(hdtopology PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
-else ()
+elseif (LINUX)
   set_target_properties(hdtopology PROPERTIES LINK_FLAGS "-Wl,--unresolved-symbols=ignore-all")
 endif()
 
