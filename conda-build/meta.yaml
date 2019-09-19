@@ -17,11 +17,10 @@ build:
     - /usr/local/lib/
     - /usr/lib/
 
+
 requirements:
   build:
-    - {{ compiler('c') }}
     - {{ compiler('cxx') }}
-    - ann
     - cmake
     - swig
   run:
@@ -33,4 +32,4 @@ about:
   home: https://github.com/LLNL/hdtopology
   license: BSD-3-Clause
   license_family: BSD
-  summary: 'Topological data analysis library of NDDAV'
+  summary: 'Topological data analysis library for NDDAV'

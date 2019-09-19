@@ -42,7 +42,7 @@ set_target_properties(ngl PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 if (APPLE)
   set_target_properties(ngl PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
-else ()
+elseif (LINUX)
   set_target_properties(ngl PROPERTIES LINK_FLAGS "-Wl,--unresolved-symbols=ignore-all")
 endif()
 
