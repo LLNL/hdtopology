@@ -10,3 +10,9 @@ cd cmake-3.12.1/
 ./configure
 make
 sudo make install
+
+mkdir /io/build
+cd /io/build
+cmake ..
+make
+make install
