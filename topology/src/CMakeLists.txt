@@ -1,3 +1,6 @@
+if(ENABLE_CUDA)
+  find_package(CUDA)
+endif(ENABLE_CUDA)
 
 SET (HDT_HEADERS
   EdgeIterator.h
@@ -7,7 +10,6 @@ SET (HDT_HEADERS
   ExtremumGraph.h
   Flags.h
   Histogram.h
-  NGLIterator.h
   NeighborhoodIterator.h
   Selectivity.h
 )
@@ -27,19 +29,12 @@ INCLUDE_DIRECTORIES(
   ${CMAKE_SOURCE_DIR}/hdfileformat/src
 )
 
-if (NGLCU_FOUND)
-  include_directories(${NGLCU_INCLUDE_DIR})
-endif(NGLCU_FOUND)
-
-
-ADD_LIBRARY(chdtopology STATIC ${HDT_SOURCES} ${HDT_HEADERS})
+add_library(chdtopology STATIC ${HDT_SOURCES} ${HDT_HEADERS})
 target_link_libraries(chdtopology hdfileformat)
+set_target_properties(chdtopology PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-if (NGLCU_FOUND)
-  target_link_libraries(chdtopology ${NGLCU_LIBRARY})
-endif (NGLCU_FOUND)
 
-# for using hdtopology as a c++ library
+########### for using hdtopology as a c++ library ###########
 # INSTALL(FILES ${HDT_HEADERS}
 #         DESTINATION ${CMAKE_INSTALL_PREFIX}/include/HDTopology
 # )

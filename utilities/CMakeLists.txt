@@ -1,5 +1,3 @@
-find_package(NGLCu)
-
 INCLUDE_DIRECTORIES(
         ${NGL_INCLUDE_DIR}
         ${ANN_INCLUDE_DIR}
@@ -7,7 +5,7 @@ INCLUDE_DIRECTORIES(
         ${CMAKE_SOURCE_DIR}/hdfileformat/src
 )
 
-if (NGLCU_FOUND)
+if (ENABLE_CUDA)
     INCLUDE_DIRECTORIES(${NGLCU_INCLUDE_DIR})
     if (FLANN_INCLUDE_DIR)
 	    INCLUDE_DIRECTORIES("${FLANN_INCLUDE_DIR}")
@@ -16,10 +14,13 @@ if (NGLCU_FOUND)
 	    INCLUDE_DIRECTORIES("${FAISS_INCLUDE_DIR}")
     endif()
     ADD_EXECUTABLE(testReadSummaryTopology testReadSummaryTopology.cpp)
-    TARGET_LINK_LIBRARIES(testReadSummaryTopology ${ANN_LIBRARY} ${NGLCU_LIBRARY} chdtopology hdfileformat)
+    TARGET_LINK_LIBRARIES(testReadSummaryTopology ${ANN_LIBRARY} ${CUDA_LIBRARIES} chdtopology hdfileformat)
 
     ADD_EXECUTABLE(testWriteSummaryTopology testWriteSummaryTopology.cpp)
-    TARGET_LINK_LIBRARIES(testWriteSummaryTopology ${ANN_LIBRARY} ${NGLCU_LIBRARY} chdtopology hdfileformat)
+    TARGET_LINK_LIBRARIES(testWriteSummaryTopology ${ANN_LIBRARY} ${CUDA_LIBRARIES} chdtopology hdfileformat)
+
+    # ADD_EXECUTABLE(testWriteStreamingTopology testWriteStreamingTopology.cpp)
+    # TARGET_LINK_LIBRARIES(testWriteStreamingTopology ${ANN_LIBRARY} ${CUDA_LIBRARIES} chdtopology hdfileformat)
 else()
 
   ADD_EXECUTABLE(testReadSummaryTopology testReadSummaryTopology.cpp)
@@ -27,6 +28,9 @@ else()
 
   ADD_EXECUTABLE(testWriteSummaryTopology testWriteSummaryTopology.cpp)
   TARGET_LINK_LIBRARIES(testWriteSummaryTopology ${ANN_LIBRARY} chdtopology hdfileformat)
+
+  # ADD_EXECUTABLE(testWriteStreamingTopology testWriteStreamingTopology.cpp)
+  # TARGET_LINK_LIBRARIES(testWriteStreamingTopology ${ANN_LIBRARY} chdtopology hdfileformat)
 
   SET(INSTALL_FILES
       ${CMAKE_SOURCE_DIR}/utilities/testReadSummaryTopology.py
@@ -37,7 +41,7 @@ else()
   INSTALL(FILES ${INSTALL_FILES}
           DESTINATION ${CMAKE_BINARY_DIR}
   )
-  INSTALL(TARGETS testWriteSummaryTopology testReadSummaryTopology
+  INSTALL(TARGETS testWriteSummaryTopology  testReadSummaryTopology
         DESTINATION ${CMAKE_BINARY_DIR}
   )
 endif()

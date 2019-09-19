@@ -5,8 +5,6 @@ project(hdtopology)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake")
 set(CMAKE_CXX_STANDARD 11)
 
-find_package(NGLCu)
-
 if(WIN32)
   set(CMAKE_SHARED_LINKER_FLAGS "/FORCE:MULTIPLE")
   set(CMAKE_MODULE_LINKER_FLAGS "/FORCE:MULTIPLE")
@@ -17,6 +15,7 @@ endif()
 
 option(ENABLE_PYTHON "Enable python binding" On)
 option(ENABLE_PACKAGING "Enable packaging for PyPI" Off)
+option(ENABLE_CUDA "Enable GPU graph pruning" Off)
 
 add_subdirectory(hdfileformat)
 add_subdirectory(ngl)
