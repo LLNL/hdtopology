@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(hdtopology)
+option(ENABLE_PYTHON "Enable python binding" On)
+option(ENABLE_PACKAGING "Enable packaging for PyPI" Off)
+option(ENABLE_CUDA "Enable GPU graph pruning" Off)
+
+if(ENABLE_CUDA)
+  project(hdtopology CXX CUDA)
+else(ENABLE_CUDA)
+  project(hdtopology CXX)
+endif(ENABLE_CUDA)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake")
 set(CMAKE_CXX_STANDARD 11)
@@ -13,9 +21,6 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 endif()
 
-option(ENABLE_PYTHON "Enable python binding" On)
-option(ENABLE_PACKAGING "Enable packaging for PyPI" Off)
-option(ENABLE_CUDA "Enable GPU graph pruning" Off)
 
 add_subdirectory(hdfileformat)
 add_subdirectory(ngl)

@@ -1,9 +1,5 @@
 %module hdff
 
-%pythonbegin %{
-from __future__ import absolute_import
-%}
-
 %include "typemaps.i"
 
 %{

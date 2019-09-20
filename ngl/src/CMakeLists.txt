@@ -21,6 +21,7 @@ INCLUDE_DIRECTORIES(
 ################ compile and link ###################
 if(ENABLE_CUDA)
   add_library(cngl STATIC ${NGL_SRC} ngl_cuda.cu Graph.cpp)
+  set_target_properties(cngl PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
   link_libraries(cngl ${ANN_LIBRARY} ${CUDA_LIBRARIES})
 else()
   add_library(cngl STATIC ${NGL_SRC})
