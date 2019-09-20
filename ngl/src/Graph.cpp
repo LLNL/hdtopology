@@ -7,13 +7,12 @@
 
 #include "Graph.h"
 #include "SearchIndex.h"
-#include "ANNSearchIndex.h"
-
 #include "ngl_cuda.h"
 #include <cstdlib>
 #include <algorithm>
 #include <vector>
 #include <unordered_set>
+#include <iostream>
 
 Graph::Graph(SearchIndex *index,
              int maxNeighbors,
@@ -35,8 +34,6 @@ Graph::Graph(SearchIndex *index,
     }
     else
     {
-        mSearchIndex = new ANNSearchIndex(0);
-        mSelfConstructedIndex = true;
     }
 }
 
@@ -45,7 +42,10 @@ void Graph::build(float *X, int N, int D)
     mData = X;
     mCount = N;
     mDim = D;
+
+    std::cout << "A" << std::endl;
     mSearchIndex->fit(mData, mCount, mDim);
+    std::cout << "B" << std::endl;
 
     size_t availableGPUMemory = nglcu::get_available_device_memory();
     fprintf(stderr, "availableGPUMemory: %ld\n", availableGPUMemory);
@@ -65,7 +65,7 @@ void Graph::build(float *X, int N, int D)
             // input edges plus another n*k for the output edges
             // We could potentially only need one set of edges for
             // this version
-            worstCase = D + 2 * k;
+            worstCase = (D + 2) * k;
         }
         else
         {
@@ -76,7 +76,7 @@ void Graph::build(float *X, int N, int D)
             // the 2*k again represents the need for two versions of
             // the edge matrix. Here, we definitely need an input and
             // an output array
-            worstCase = (D + 2 * k) * (k + 1);
+            worstCase = k * (D + 2) * (k + 1);
         }
 
         // If we are using the discrete algorithm, remember we need
@@ -96,13 +96,15 @@ void Graph::build(float *X, int N, int D)
     if(mQuerySize>100000){
        mQuerySize = 100000;
     }
-    //*/
+    */
     fprintf(stderr, "mQuerySize: %ld   mCount: %ld \n", mQuerySize, mCount);
     mChunked = mQuerySize < mCount;
 
+    std::cout << "C" << std::endl;
     populate();
+    std::cout << "D" << std::endl;
     // Load up the first edge
-    while (mEdges[(mCurrentRow - mRowOffset) * mMaxNeighbors + mCurrentCol] == -1)
+    while (mEdges[(mCurrentRow - mRowOffset) * mMaxNeighbors + mCurrentCol] == -1 && !mIterationFinished)
     {
         advanceIteration();
     }
@@ -130,6 +132,7 @@ void Graph::populate_chunk(int startIndex)
     int count = std::min(mCount - startIndex, mQuerySize);
     int edgeCount = count;
     int endIndex = startIndex + count;
+
     mSearchIndex->search(mRowOffset, count, mMaxNeighbors, mEdges, mDistances);
 
     std::unordered_set<int> additionalIndices;
@@ -143,6 +146,7 @@ void Graph::populate_chunk(int startIndex)
             }
         }
     }
+
     std::vector<int> indices;
     for (int i = startIndex; i < endIndex; i++)
     {
@@ -156,14 +160,23 @@ void Graph::populate_chunk(int startIndex)
         {
             indices.push_back(*it);
         }
+
         if (!mRelaxed)
         {
             int *extraEdges = new int[extraCount * mMaxNeighbors];
+            // This should not be necessary, but otherwise I need to make sure every index
+            // properly handles the null pointer.
+            float *extraDistances = new float[extraCount * mMaxNeighbors];
             int *extraIndices = indices.data() + count;
-            mSearchIndex->search(extraIndices, extraCount, mMaxNeighbors, extraEdges, NULL);
-            delete extraIndices;
+
+            mSearchIndex->search(extraIndices, extraCount, mMaxNeighbors, extraEdges, extraDistances);
+            // Again, delete usage of extraDistances if we can make all of the SearchIndices use the following signature:
+            // mSearchIndex->search(extraIndices, extraCount, mMaxNeighbors, extraEdges, NULL);
+            delete extraDistances;
+
             edgeCount = count + extraCount;
             int *allEdges = new int[edgeCount * mMaxNeighbors];
+
             for (int i = 0; i < count; i++)
             {
                 for (int k = 0; k < mMaxNeighbors; k++)
@@ -187,7 +200,9 @@ void Graph::populate_chunk(int startIndex)
 
             for (auto it = additionalIndices.begin(); it != additionalIndices.end(); it++)
             {
-                indices.push_back(*it);
+                if(uniqueIndices.find(*it) == uniqueIndices.end()) {
+                    indices.push_back(*it);
+                }
             }
         }
     }
@@ -219,6 +234,7 @@ void Graph::populate_whole()
 {
     mSearchIndex->search(0, mCount, mMaxNeighbors, mEdges, mDistances);
 
+    std::cerr << "Relaxed: " << mRelaxed << std::endl;
     if (mDiscreteSteps > 0)
     {
         nglcu::prune_discrete(mData, mEdges, NULL, mCount, mDim, mCount,
@@ -237,7 +253,7 @@ void Graph::restart_iteration()
     mCurrentCol = 0;
     mCurrentRow = 0;
     // Load up the first edge
-    while (mEdges[(mCurrentRow - mRowOffset) * mMaxNeighbors + mCurrentCol] == -1)
+    while (mEdges[(mCurrentRow - mRowOffset) * mMaxNeighbors + mCurrentCol] == -1 && !mIterationFinished)
     {
         advanceIteration();
     }
@@ -257,25 +273,12 @@ Edge Graph::next()
     }
     int currentIndex = (mCurrentRow - mRowOffset) * mMaxNeighbors + mCurrentCol;
     e.distance = mDistances[currentIndex];
-    if (mReversed)
-    {
-        e.indices[0] = mEdges[currentIndex];
-        e.indices[1] = mCurrentRow;
-    }
-    else
-    {
-        e.indices[0] = mCurrentRow;
-        e.indices[1] = mEdges[currentIndex];
-    }
-
-    mReversed = !mReversed;
-    if (!mReversed)
+    e.indices[0] = mEdges[currentIndex];
+    e.indices[1] = mCurrentRow;
+    advanceIteration();
+    while (mEdges[(mCurrentRow - mRowOffset) * mMaxNeighbors + mCurrentCol] == -1)
     {
         advanceIteration();
-        while (mEdges[(mCurrentRow - mRowOffset) * mMaxNeighbors + mCurrentCol] == -1)
-        {
-            advanceIteration();
-        }
     }
 
     return e;
