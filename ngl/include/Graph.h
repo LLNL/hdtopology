@@ -57,7 +57,6 @@ private:
     int mRowOffset = 0;
     int mCurrentRow = 0;
     int mCurrentCol = 0;
-    bool mReversed = false;
     bool mChunked = false;
     bool mIterationFinished = false;
 };

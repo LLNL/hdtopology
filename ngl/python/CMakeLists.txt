@@ -13,15 +13,10 @@ SET(SWIG_SRC
        ngl.i
 )
 
-SET(SWIG_CC_SRC
-        getNeighborGraph.cpp
-        ANNSearchIndex.cpp
-)
-
 INCLUDE_DIRECTORIES(
-        ${CMAKE_CURRENT_SOURCE_DIR}
         ${NGL_INCLUDE_DIR}
         ${ANN_INCLUDE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}
         ${Python3_INCLUDE_DIRS}
         ${Python3_NumPy_INCLUDE_DIRS}
 )
@@ -30,15 +25,14 @@ set_property(SOURCE ${SWIG_SRC} PROPERTY CPLUSPLUS ON)
 
 ################ compile and link ###################
 if(ENABLE_CUDA)
-  SWIG_ADD_LIBRARY(ngl TYPE MODULE LANGUAGE python SOURCES ${SWIG_SRC} ${SWIG_CC_SRC} ngl_cuda.cu Graph.cpp)
-  SWIG_LINK_LIBRARIES(ngl ${ANN_LIBRARY} ${CUDA_LIBRARIES})
+  SWIG_ADD_LIBRARY(ngl TYPE MODULE LANGUAGE python SOURCES ${SWIG_SRC})
+  SWIG_LINK_LIBRARIES(ngl cngl ${ANN_LIBRARY} ${CUDA_LIBRARIES})
 else()
-  SWIG_ADD_LIBRARY(ngl TYPE MODULE LANGUAGE python SOURCES ${SWIG_SRC} ${SWIG_CC_SRC})
-  SWIG_LINK_LIBRARIES(ngl ${ANN_LIBRARY})
+  SWIG_ADD_LIBRARY(ngl TYPE MODULE LANGUAGE python SOURCES ${SWIG_SRC})
+  SWIG_LINK_LIBRARIES(ngl cngl ${ANN_LIBRARY})
 endif(ENABLE_CUDA)
 
 set_target_properties(ngl PROPERTIES POSITION_INDEPENDENT_CODE ON)
-# SWIG_LINK_LIBRARIES(ngl ${Python3_LIBRARIES} ${ANN_LIBRARY})
 
 if (APPLE)
   set_target_properties(ngl PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")

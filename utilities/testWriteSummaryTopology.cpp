@@ -6,10 +6,10 @@
 #include <map>
 #include <algorithm>
 #ifndef _MSC_VER
-	#include <sys/time.h>
-	#include <unistd.h>
+  #include <sys/time.h>
+  #include <unistd.h>
 #else
-	#include <io.h>
+  #include <io.h>
 #endif
 #include <iomanip>
 #include <cmath>
@@ -31,23 +31,23 @@ using namespace ngl;
 
 int gettimeofday(struct timeval* tp, struct timezone* tzp)
 {
-	// Note: some broken versions only have 8 trailing zero's, the correct epoch has 9 trailing zero's
-	// This magic number is the number of 100 nanosecond intervals since January 1, 1601 (UTC)
-	// until 00:00:00 January 1, 1970 
-	static const uint64_t EPOCH = ((uint64_t)116444736000000000ULL);
+  // Note: some broken versions only have 8 trailing zero's, the correct epoch has 9 trailing zero's
+  // This magic number is the number of 100 nanosecond intervals since January 1, 1601 (UTC)
+  // until 00:00:00 January 1, 1970
+  static const uint64_t EPOCH = ((uint64_t)116444736000000000ULL);
 
-	SYSTEMTIME  system_time;
-	FILETIME    file_time;
-	uint64_t    time;
+  SYSTEMTIME  system_time;
+  FILETIME    file_time;
+  uint64_t    time;
 
-	GetSystemTime(&system_time);
-	SystemTimeToFileTime(&system_time, &file_time);
-	time = ((uint64_t)file_time.dwLowDateTime);
-	time += ((uint64_t)file_time.dwHighDateTime) << 32;
+  GetSystemTime(&system_time);
+  SystemTimeToFileTime(&system_time, &file_time);
+  time = ((uint64_t)file_time.dwLowDateTime);
+  time += ((uint64_t)file_time.dwHighDateTime) << 32;
 
-	tp->tv_sec = (long)((time - EPOCH) / 10000000L);
-	tp->tv_usec = (long)(system_time.wMilliseconds * 1000);
-	return 0;
+  tp->tv_sec = (long)((time - EPOCH) / 10000000L);
+  tp->tv_usec = (long)(system_time.wMilliseconds * 1000);
+  return 0;
 }
 
 #endif
@@ -88,10 +88,10 @@ static inline timestamp now()
 }
 
 class CommandLine {
-	std::vector<std::string> argnames;
+  std::vector<std::string> argnames;
   std::map<std::string, std::string> args;
-	std::map<std::string, std::string> descriptions;
-	std::vector<std::string> requiredArgs;
+  std::map<std::string, std::string> descriptions;
+  std::vector<std::string> requiredArgs;
   public:
     CommandLine() { }
     void addArgument(std::string cmd, std::string defaultValue, std::string description="", bool required = false) {
@@ -306,6 +306,27 @@ int main(int argc, char **argv)
   std::cerr << blue << "Generating Data " << t2 - t1 << " s" << def << std::endl;
   t1 = now();
 
+  //////////////// Compute Extrema Graph ////////////////
+  ExtremumGraphExt eg;
+  Flags *flags = NULL;
+
+ #ifdef ENABLE_CUDA
+  SearchIndex *index = NULL;
+  std::string library = cl.getArgString("-l");
+  if (library.compare("ANN") == 0 || library.compare("ann") == 0) {
+   index = new ANNSearchIndex(0);
+  }
+  else if (library.compare("FAISS") == 0 || library.compare("faiss") == 0) {
+   index = new FAISSSearchIndex();
+  }
+  else if (library.compare("FLANN") == 0 || library.compare("flann") == 0) {
+   index = new FLANNSearchIndex();
+  }
+
+  NGLIterator it(x, N, D, K, relaxed, beta, lp, steps, Q, index);
+  eg.initialize(&data, flags, it, true, 10, ExtremumGraphExt::ComputeMode::HISTOGRAM);
+
+ #else
  //////////////////////////////// Replace this block with an EdgeIterator
   IndexType *indices;
   int numEdges;
@@ -326,17 +347,11 @@ int main(int argc, char **argv)
   std::cout<<"numEdges:"<<numEdges<<std::endl;
 
   Neighborhood edges(indices, numEdges);
-
-  ////////////////////////////////
-
-
-  ExtremumGraphExt eg;
-  Flags *flags = NULL;
-
   eg.initialize(&data, flags, &edges, true, 10, ExtremumGraphExt::ComputeMode::HISTOGRAM);
 
+#endif
   t2 = now();
-  std::cerr << blue << "Building Extremum Graph with NeighborhoodIterator " << t2-t1 << " s" << def << std::endl;
+  std::cerr << blue << "Building Extremum Graph with NGLIterator " << t2-t1 << " s" << def << std::endl;
   t1 = now();
 
   HDFileFormat::DataBlockHandle mc;
