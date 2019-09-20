@@ -30,8 +30,12 @@ set_property(SOURCE ${SWIG_SRC} PROPERTY CPLUSPLUS ON)
 
 ################ compile and link ###################
 if(ENABLE_CUDA)
-  SWIG_ADD_LIBRARY(ngl TYPE MODULE LANGUAGE python SOURCES ${SWIG_SRC} ${SWIG_CC_SRC} ngl_cuda.cu Graph.cpp)
-  SWIG_LINK_LIBRARIES(ngl ${ANN_LIBRARY} ${CUDA_LIBRARIES})
+  add_library(nglCuda STATIC ngl_cuda.cu)
+  set_target_properties(nglCuda PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+  set_target_properties(nglCuda PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+  SWIG_ADD_LIBRARY(ngl TYPE MODULE LANGUAGE python SOURCES ${SWIG_SRC} ${SWIG_CC_SRC} Graph.cpp)
+  SWIG_LINK_LIBRARIES(ngl ${ANN_LIBRARY} nglCuda ${CUDA_LIBRARIES})
 else()
   SWIG_ADD_LIBRARY(ngl TYPE MODULE LANGUAGE python SOURCES ${SWIG_SRC} ${SWIG_CC_SRC})
   SWIG_LINK_LIBRARIES(ngl ${ANN_LIBRARY})
