@@ -36,6 +36,8 @@ set_target_properties(ngl PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 if (APPLE)
   set_target_properties(ngl PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+elseif (WIN32)
+  target_link_libraries(ngl ${Python3_LIBRARIES})
 elseif (LINUX)
   set_target_properties(ngl PROPERTIES LINK_FLAGS "-Wl,--unresolved-symbols=ignore-all")
 endif()

@@ -51,6 +51,8 @@ SWIG_LINK_LIBRARIES(hdtopology chdtopology)
 
 if (APPLE)
   set_target_properties(hdtopology PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+elseif (WIN32)
+  target_link_libraries(hdtopology ${Python3_LIBRARIES})  
 elseif (LINUX)
   set_target_properties(hdtopology PROPERTIES LINK_FLAGS "-Wl,--unresolved-symbols=ignore-all")
 endif()

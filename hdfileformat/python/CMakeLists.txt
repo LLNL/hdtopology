@@ -33,6 +33,8 @@ SWIG_LINK_LIBRARIES(hdff hdfileformat)
 
 if (APPLE)
   set_target_properties(hdff PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+elseif (WIN32)
+  target_link_libraries(hdff ${Python3_LIBRARIES})
 elseif (LINUX)
   set_target_properties(hdff PROPERTIES LINK_FLAGS "-Wl,--unresolved-symbols=ignore-all")
 endif()
