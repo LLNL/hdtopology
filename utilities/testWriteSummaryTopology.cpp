@@ -310,7 +310,7 @@ int main(int argc, char **argv)
   ExtremumGraphExt eg;
   Flags *flags = NULL;
 
- #ifdef ENABLE_CUDA
+#ifdef ENABLE_CUDA
   SearchIndex *index = NULL;
   std::string library = cl.getArgString("-l");
   if (library.compare("ANN") == 0 || library.compare("ann") == 0) {
@@ -326,7 +326,7 @@ int main(int argc, char **argv)
   NGLIterator it(x, N, D, K, relaxed, beta, lp, steps, Q, index);
   eg.initialize(&data, flags, it, true, 10, ExtremumGraphExt::ComputeMode::HISTOGRAM);
 
- #else
+#else
  //////////////////////////////// Replace this block with an EdgeIterator
   IndexType *indices;
   int numEdges;

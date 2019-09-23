@@ -47,8 +47,10 @@ void Graph::build(float *X, int N, int D)
     mSearchIndex->fit(mData, mCount, mDim);
     std::cout << "B" << std::endl;
 
+#ifdef ENABLE_CUDA
     size_t availableGPUMemory = nglcu::get_available_device_memory();
     fprintf(stderr, "availableGPUMemory: %ld\n", availableGPUMemory);
+
     if (mQuerySize < 0)
     {
         // Because we are using f32 and i32:
@@ -97,6 +99,10 @@ void Graph::build(float *X, int N, int D)
        mQuerySize = 100000;
     }
     */
+#else
+    mQuerySize = 100000; //if on CPU
+#endif
+
     fprintf(stderr, "mQuerySize: %ld   mCount: %ld \n", mQuerySize, mCount);
     mChunked = mQuerySize < mCount;
 
@@ -218,13 +224,19 @@ void Graph::populate_chunk(int startIndex)
 
     if (mDiscreteSteps > 0)
     {
+#ifdef ENABLE_CUDA
         nglcu::prune_discrete(X, mEdges, indices.data(), indices.size(), mDim, edgeCount,
                               mMaxNeighbors, NULL, mDiscreteSteps, mRelaxed, mBeta, mLp, count);
+#else
+#endif
     }
     else
     {
+#ifdef ENABLE_CUDA
         nglcu::prune(X, mEdges, indices.data(), indices.size(), mDim, edgeCount,
                      mMaxNeighbors, mRelaxed, mBeta, mLp, count);
+#else
+#endif
     }
 
     delete X;
@@ -237,13 +249,19 @@ void Graph::populate_whole()
     std::cerr << "Relaxed: " << mRelaxed << std::endl;
     if (mDiscreteSteps > 0)
     {
+#ifdef ENABLE_CUDA
         nglcu::prune_discrete(mData, mEdges, NULL, mCount, mDim, mCount,
                               mMaxNeighbors, NULL, mDiscreteSteps, mRelaxed, mBeta, mLp);
+#else
+#endif
     }
     else
     {
+#ifdef ENABLE_CUDA
         nglcu::prune(mData, mEdges, NULL, mCount, mDim, mCount,
                      mMaxNeighbors, mRelaxed, mBeta, mLp);
+#else
+#endif
     }
 }
 

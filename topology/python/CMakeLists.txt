@@ -35,16 +35,6 @@ endif(NGLCU_FOUND)
 
 set_property(SOURCE ${SWIG_SRC} PROPERTY CPLUSPLUS ON)
 
-if (NGLCU_FOUND)
-	message("Building with CUDA-Enabled NGL support")
-    # add_definitions(-DNGLCU_AVAILABLE)
-    set(CMAKE_SWIG_FLAGS -DNGLCU_AVAILABLE)
-else()
-	message("CUDA-Enabled NGL not available")
-endif(NGLCU_FOUND)
-
-# SET(SWIG_MODULE_hdtopology_EXTRA_DEPS typemaps.i)
-
 ################ compile and link ###################
 SWIG_ADD_LIBRARY(hdtopology TYPE MODULE LANGUAGE python SOURCES ${SWIG_SRC})
 SWIG_LINK_LIBRARIES(hdtopology chdtopology)
@@ -52,7 +42,7 @@ SWIG_LINK_LIBRARIES(hdtopology chdtopology)
 if (APPLE)
   set_target_properties(hdtopology PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
 elseif (WIN32)
-  target_link_libraries(hdtopology ${Python3_LIBRARIES})  
+  target_link_libraries(hdtopology ${Python3_LIBRARIES})
 elseif (LINUX)
   set_target_properties(hdtopology PROPERTIES LINK_FLAGS "-Wl,--unresolved-symbols=ignore-all")
 endif()
