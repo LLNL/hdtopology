@@ -19,6 +19,10 @@
 using namespace ngl;
 
 #include <ExtremumGraph.h>
+#include <Graph.h>
+#include <ANNSearchIndex.h>
+#include <NGLIterator.h>
+
 #include <Neighborhood.h>
 #include <NeighborhoodIterator.h>
 #include <DataCollectionHandle.h>
@@ -203,6 +207,7 @@ int main(int argc, char **argv)
   cl.addArgument("-a", "-1", "Number of attributes", false);
   cl.addArgument("-f", "-1", "Index for function value", false);
   cl.addArgument("-q", "-1", "Query Size for NGLIterator", false);
+  cl.addArgument("-l", "ann", "Neighborhood query library", false);
 
   cl.addArgument("-k", "500", "K max", false);
   cl.addArgument("-b", "1.0", "Beta", false);
@@ -310,24 +315,27 @@ int main(int argc, char **argv)
   ExtremumGraphExt eg;
   Flags *flags = NULL;
 
-#ifdef ENABLE_CUDA
+#ifdef ENABLE_STREAMING
   SearchIndex *index = NULL;
   std::string library = cl.getArgString("-l");
   if (library.compare("ANN") == 0 || library.compare("ann") == 0) {
    index = new ANNSearchIndex(0);
   }
-  else if (library.compare("FAISS") == 0 || library.compare("faiss") == 0) {
-   index = new FAISSSearchIndex();
-  }
-  else if (library.compare("FLANN") == 0 || library.compare("flann") == 0) {
-   index = new FLANNSearchIndex();
-  }
+  // else if (library.compare("FAISS") == 0 || library.compare("faiss") == 0) {
+  //  index = new FAISSSearchIndex();
+  // }
+  // else if (library.compare("FLANN") == 0 || library.compare("flann") == 0) {
+  //  index = new FLANNSearchIndex();
+  // }
 
   NGLIterator it(x, N, D, K, relaxed, beta, lp, steps, Q, index);
   eg.initialize(&data, flags, it, true, 10, ExtremumGraphExt::ComputeMode::HISTOGRAM);
 
-#else
- //////////////////////////////// Replace this block with an EdgeIterator
+  t2 = now();
+  std::cerr << blue << "Building Extremum Graph with streaming NGLIterator: " << t2-t1 << " s" << def << std::endl;
+  t1 = now();
+
+#else ////////// directly compute the empty region graph using ngl //////////////
   IndexType *indices;
   int numEdges;
 
@@ -349,10 +357,12 @@ int main(int argc, char **argv)
   Neighborhood edges(indices, numEdges);
   eg.initialize(&data, flags, &edges, true, 10, ExtremumGraphExt::ComputeMode::HISTOGRAM);
 
-#endif
   t2 = now();
-  std::cerr << blue << "Building Extremum Graph with NGLIterator " << t2-t1 << " s" << def << std::endl;
+  std::cerr << blue << "Building Extremum Graph with NGL: " << t2-t1 << " s" << def << std::endl;
   t1 = now();
+
+#endif
+
 
   HDFileFormat::DataBlockHandle mc;
   mc.idString("TDA");

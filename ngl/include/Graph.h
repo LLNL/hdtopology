@@ -34,6 +34,14 @@ public:
     void restart_iteration();
     Edge next();
 
+    //cpu empty region graph computation
+    void prune_discrete(float *X, int *edges, int *indices, int N, int D, int M, int K,
+                        float *erTemplate, int steps, bool relaxed, float beta,
+                        float p, int count=-1);
+
+    void prune(float *X, int *edges, int *indices, int N, int D, int M, int K,
+                                   bool relaxed, float beta, float lp, int count=-1);
+    void map_indices(int *matrix, int *map, int M, int N);                               
     virtual ~Graph();
 private:
     void advanceIteration();

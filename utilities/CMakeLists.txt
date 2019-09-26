@@ -1,3 +1,7 @@
+IF(ENABLE_STREAMING)
+  ADD_DEFINITIONS(-DENABLE_STREAMING)
+ENDIF(ENABLE_STREAMING)
+
 INCLUDE_DIRECTORIES(
         ${NGL_INCLUDE_DIR}
         ${ANN_INCLUDE_DIR}
@@ -27,7 +31,7 @@ else()
   TARGET_LINK_LIBRARIES(testReadSummaryTopology ${ANN_LIBRARY} chdtopology hdfileformat)
 
   ADD_EXECUTABLE(testWriteSummaryTopology testWriteSummaryTopology.cpp)
-  TARGET_LINK_LIBRARIES(testWriteSummaryTopology ${ANN_LIBRARY} chdtopology hdfileformat)
+  TARGET_LINK_LIBRARIES(testWriteSummaryTopology ${ANN_LIBRARY} chdtopology hdfileformat cngl)
 
   # ADD_EXECUTABLE(testWriteStreamingTopology testWriteStreamingTopology.cpp)
   # TARGET_LINK_LIBRARIES(testWriteStreamingTopology ${ANN_LIBRARY} chdtopology hdfileformat)

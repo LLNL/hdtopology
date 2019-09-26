@@ -2,7 +2,12 @@
 SET(NGL_SRC
         getNeighborGraph.cpp
         ANNSearchIndex.cpp
+        Graph.cpp
 )
+
+if(ENABLE_CUDA)
+  ADD_DEFINITIONS(-DENABLE_CUDA)
+endif(ENABLE_CUDA)
 
 if(FAISS_FOUND)
 list(APPEND NGL_SRC FLANNSearchIndex.cpp)
@@ -20,7 +25,7 @@ INCLUDE_DIRECTORIES(
 
 ################ compile and link ###################
 if(ENABLE_CUDA)
-  add_library(cngl STATIC ${NGL_SRC} ngl_cuda.cu Graph.cpp)
+  add_library(cngl STATIC ${NGL_SRC} ngl_cuda.cu )
   set_target_properties(cngl PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
   link_libraries(cngl ${ANN_LIBRARY} ${CUDA_LIBRARIES})
 else()

@@ -13,6 +13,7 @@
 #include <vector>
 #include <unordered_set>
 #include <iostream>
+#include <cmath>
 
 Graph::Graph(SearchIndex *index,
              int maxNeighbors,
@@ -43,9 +44,11 @@ void Graph::build(float *X, int N, int D)
     mCount = N;
     mDim = D;
 
-    std::cout << "A" << std::endl;
+    std::cout << "buildIndex ...." << std::endl;
+    std::cout << "  mCount = " << mCount << std::endl;
+    std::cout << "  mDim = " << mDim << std::endl;
     mSearchIndex->fit(mData, mCount, mDim);
-    std::cout << "B" << std::endl;
+    std::cout << "buildIndex done\n" << std::endl;
 
 #ifdef ENABLE_CUDA
     size_t availableGPUMemory = nglcu::get_available_device_memory();
@@ -100,15 +103,16 @@ void Graph::build(float *X, int N, int D)
     }
     */
 #else
-    mQuerySize = 100000; //if on CPU
+    mQuerySize = 10000; //if on CPU
+    // mQuerySize = 100000; //if on CPU
 #endif
 
-    fprintf(stderr, "mQuerySize: %ld   mCount: %ld \n", mQuerySize, mCount);
+    fprintf(stderr, "mQuerySize: %d   mCount: %d \n", mQuerySize, mCount);
     mChunked = mQuerySize < mCount;
 
-    std::cout << "C" << std::endl;
+    std::cout << "populate first query ... " << std::endl;
     populate();
-    std::cout << "D" << std::endl;
+    std::cout << "populate done" << std::endl;
     // Load up the first edge
     while (mEdges[(mCurrentRow - mRowOffset) * mMaxNeighbors + mCurrentCol] == -1 && !mIterationFinished)
     {
@@ -138,6 +142,10 @@ void Graph::populate_chunk(int startIndex)
     int count = std::min(mCount - startIndex, mQuerySize);
     int edgeCount = count;
     int endIndex = startIndex + count;
+
+    std::cerr << "  Graph::populate_chunk"<< std::endl;
+    std::cerr << "   startIndex: " << startIndex << std::endl;
+    std::cerr << "   endIndex: " << endIndex << std::endl;
 
     mSearchIndex->search(mRowOffset, count, mMaxNeighbors, mEdges, mDistances);
 
@@ -178,7 +186,7 @@ void Graph::populate_chunk(int startIndex)
             mSearchIndex->search(extraIndices, extraCount, mMaxNeighbors, extraEdges, extraDistances);
             // Again, delete usage of extraDistances if we can make all of the SearchIndices use the following signature:
             // mSearchIndex->search(extraIndices, extraCount, mMaxNeighbors, extraEdges, NULL);
-            delete extraDistances;
+            delete [] extraDistances;
 
             edgeCount = count + extraCount;
             int *allEdges = new int[edgeCount * mMaxNeighbors];
@@ -201,7 +209,7 @@ void Graph::populate_chunk(int startIndex)
                 }
             }
             delete mEdges;
-            delete extraEdges;
+            delete [] extraEdges;
             mEdges = allEdges;
 
             for (auto it = additionalIndices.begin(); it != additionalIndices.end(); it++)
@@ -225,42 +233,52 @@ void Graph::populate_chunk(int startIndex)
     if (mDiscreteSteps > 0)
     {
 #ifdef ENABLE_CUDA
-        nglcu::prune_discrete(X, mEdges, indices.data(), indices.size(), mDim, edgeCount,
+      nglcu::prune_discrete(X, mEdges, indices.data(), indices.size(), mDim, edgeCount,
                               mMaxNeighbors, NULL, mDiscreteSteps, mRelaxed, mBeta, mLp, count);
 #else
+      this->prune_discrete(X, mEdges, indices.data(), indices.size(), mDim, edgeCount,
+                            mMaxNeighbors, NULL, mDiscreteSteps, mRelaxed, mBeta, mLp, count);
 #endif
     }
     else
     {
 #ifdef ENABLE_CUDA
-        nglcu::prune(X, mEdges, indices.data(), indices.size(), mDim, edgeCount,
+      nglcu::prune(X, mEdges, indices.data(), indices.size(), mDim, edgeCount,
                      mMaxNeighbors, mRelaxed, mBeta, mLp, count);
 #else
+      this->prune(X, mEdges, indices.data(), indices.size(), mDim, edgeCount,
+                     mMaxNeighbors, mRelaxed, mBeta, mLp, count);
 #endif
     }
 
-    delete X;
+    delete [] X;
 }
 
 void Graph::populate_whole()
 {
     mSearchIndex->search(0, mCount, mMaxNeighbors, mEdges, mDistances);
 
-    std::cerr << "Relaxed: " << mRelaxed << std::endl;
+    std::cerr << "  Graph::populate_whole"<< std::endl;
+    std::cerr << "   Relaxed: " << mRelaxed << std::endl;
+    std::cerr << "   mDiscreteSteps: " << mDiscreteSteps << std::endl;
     if (mDiscreteSteps > 0)
     {
 #ifdef ENABLE_CUDA
-        nglcu::prune_discrete(mData, mEdges, NULL, mCount, mDim, mCount,
+      nglcu::prune_discrete(mData, mEdges, NULL, mCount, mDim, mCount,
                               mMaxNeighbors, NULL, mDiscreteSteps, mRelaxed, mBeta, mLp);
 #else
+      this->prune_discrete(mData, mEdges, NULL, mCount, mDim, mCount,
+                            mMaxNeighbors, NULL, mDiscreteSteps, mRelaxed, mBeta, mLp);
 #endif
     }
     else
     {
 #ifdef ENABLE_CUDA
-        nglcu::prune(mData, mEdges, NULL, mCount, mDim, mCount,
+      nglcu::prune(mData, mEdges, NULL, mCount, mDim, mCount,
                      mMaxNeighbors, mRelaxed, mBeta, mLp);
 #else
+      this->prune(mData, mEdges, NULL, mCount, mDim, mCount,
+                     mMaxNeighbors, mRelaxed, mBeta, mLp);
 #endif
     }
 }
@@ -334,4 +352,248 @@ Graph::~Graph()
     }
     delete mEdges;
     delete mDistances;
+}
+
+
+//////////
+void Graph::map_indices(int *matrix, int *map, int M, int N){
+  for (int row = 0; row < M; row ++) {
+    for (int col = 0; col < N; col ++) {
+      if(matrix[row*N+col] != -1) {
+        matrix[row*N+col] = map[matrix[row*N+col]];
+      }
+    }
+  }
+}
+
+void Graph::prune_discrete(float *X, int *edges, int *indices, int N, int D, int M, int K,
+                    float *erTemplate, int steps, bool relaxed, float beta,
+                    float p, int count)
+{
+
+
+}
+
+void Graph::prune(float *X, int *edges, int *indices, int N, int D, int M, int K,
+           bool relaxed, float beta, float lp, int count)
+{
+  if (count < 0) {
+      count = N;
+  }
+
+  // std::cerr << "    N = "<< N << std::endl;
+  // std::cerr << "    D = "<< D << std::endl;
+  // std::cerr << "    M = "<< M << std::endl;
+  // std::cerr << "    K = "<< K << std::endl;
+  // std::cerr << "    relaxed = "<< relaxed << std::endl;
+  // std::cerr << "    count = "<< count << std::endl;
+  // std::cerr << "    beta = "<< beta << std::endl;
+  // std::cerr << "    lp = "<< lp << std::endl;
+
+  int *edgesOut = (int*)malloc(count*K*sizeof(int));
+  memcpy(edgesOut, edges, count*K*sizeof(int));
+
+  //map gloabl index to local index
+  if (indices != NULL) {
+      int *map_d;
+      int i;
+
+      int max_index = 0;
+      for(i = 0; i < N; i++) {
+          if(indices[i] > max_index) {
+              max_index = indices[i];
+          }
+      }
+      // std::cerr << "    max_index = "<< max_index << std::endl;
+      map_d = (int*)malloc(max_index*sizeof(int));
+      for(i = 0; i < N; i++) {
+          map_d[indices[i]] = i;
+      }
+      this->map_indices(edges, map_d, M, K);
+      this->map_indices(edgesOut, map_d, M, K);
+
+      delete map_d;
+      // std::cerr << "    mappedIndex ... " << std::endl;
+  }
+
+  std::cerr << "    begin purning ... " << std::endl;
+
+  if(relaxed){
+    float *p, *q, *r;
+
+    float pq[50] = {};
+    float pr[50] = {};
+
+    int i, j, k, k2, d, n;
+    float t;
+
+    float length_squared;
+    float squared_distance_to_edge;
+    float minimum_allowable_distance;
+
+    ////////////////////////////////////////////////////////////
+    float xC, yC, radius, y;
+    ////////////////////////////////////////////////////////////
+
+    for (i = 0; i < count; i++) {
+        for (k = 0; k < K; k++) {
+            p = &(X[D*i]);
+            j = edges[K*i+k];
+            q = &(X[D*j]);
+
+            length_squared = 0;
+            for(d = 0; d < D; d++) {
+                pq[d] = p[d] - q[d];
+                length_squared += pq[d]*pq[d];
+            }
+            // A point should not be connected to itself
+            if(length_squared == 0) {
+                edgesOut[K*i+k] = -1;
+                continue;
+            }
+
+            // This loop presumes that all nearer neighbors have
+            // already been processed
+            for(k2 = 0; k2 < k; k2++) {
+                n = edgesOut[K*i+k2];
+                if (n == -1){
+                    continue;
+                }
+                r = &(X[D*n]);
+
+                // t is the parameterization of the projection of pr onto pq
+                // In layman's terms, this is the length of the shadow pr casts onto pq
+                t = 0;
+                for(d = 0; d < D; d++) {
+                    pr[d] = p[d] - r[d];
+                    t += pr[d]*pq[d];
+                }
+
+                t /= length_squared;
+
+                if (t > 0 && t < 1) {
+                    squared_distance_to_edge = 0;
+                    for(d = 0; d < D; d++) {
+                        squared_distance_to_edge += (pr[d] - pq[d]*t)*(pr[d] - pq[d]*t);
+                    }
+
+                    ////////////////////////////////////////////////////////////
+                    // ported from python function, can possibly be improved
+                    // in terms of performance
+                    xC = 0;
+                    yC = 0;
+
+                    if (beta <= 1) {
+                        radius = 1. / beta;
+                        yC = powf(powf(radius, lp) - 1, 1. / lp);
+                    }
+                    else {
+                        radius = beta;
+                        xC = 1. - beta;
+                    }
+                    t = fabs(2*t-1);
+                    y = powf(powf(radius, lp) - powf(t-xC, lp), 1. / lp) - yC;
+                    minimum_allowable_distance = 0.5*y*sqrt(length_squared);
+
+                    //////////////////////////////////////////////////////////
+                    if(sqrt(squared_distance_to_edge) < minimum_allowable_distance) {
+                        edgesOut[K*i+k] = -1;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+  }else{
+    float *p, *q, *r;
+
+    float pq[50] = {};
+    float pr[50] = {};
+
+    int i, j, k, k2, d, n;
+    float t;
+
+    float length_squared;
+    float squared_distance_to_edge;
+    float minimum_allowable_distance;
+
+    ////////////////////////////////////////////////////////////
+    float xC, yC, radius, y;
+    ////////////////////////////////////////////////////////////
+
+    for (k = 0; k < K; k++) {
+        for (i = 0; i < count; i++) {
+            p = &(X[D*i]);
+            j = edges[K*i+k];
+            q = &(X[D*j]);
+
+            length_squared = 0;
+            for(d = 0; d < D; d++) {
+                pq[d] = p[d] - q[d];
+                length_squared += pq[d]*pq[d];
+            }
+            // A point should not be connected to itself
+            if(length_squared == 0) {
+                edgesOut[K*i+k] = -1;
+                continue;
+            }
+
+            for(k2 = 0; k2 < 2*K; k2++) {
+                n = (k2 < K) ? edges[K*i+k2] : edges[K*j+(k2-K)];
+                r = &(X[D*n]);
+
+                // t is the parameterization of the projection of pr onto pq
+                // In layman's terms, this is the length of the shadow pr casts onto pq
+                t = 0;
+                for(d = 0; d < D; d++) {
+                    pr[d] = p[d] - r[d];
+                    t += pr[d]*pq[d];
+                }
+
+                t /= length_squared;
+
+                if (t > 0 && t < 1) {
+                    squared_distance_to_edge = 0;
+                    for(d = 0; d < D; d++) {
+                        squared_distance_to_edge += (pr[d] - pq[d]*t)*(pr[d] - pq[d]*t);
+                    }
+
+                    ////////////////////////////////////////////////////////////
+                    // ported from python function, can possibly be improved
+                    // in terms of performance
+                    xC = 0;
+                    yC = 0;
+
+                    if (beta <= 1) {
+                        radius = 1. / beta;
+                        yC = powf(powf(radius, lp) - 1, 1. / lp);
+                    }
+                    else {
+                        radius = beta;
+                        xC = 1. - beta;
+                    }
+                    t = fabs(2*t-1);
+                    y = powf(powf(radius, lp) - powf(t-xC, lp), 1. / lp) - yC;
+                    minimum_allowable_distance = 0.5*y*sqrt(length_squared);
+
+                    //////////////////////////////////////////////////////////
+                    if(sqrt(squared_distance_to_edge) < minimum_allowable_distance) {
+                        edgesOut[K*i+k] = -1;
+                        break;
+                    }
+                  }
+              }
+            }
+        }
+    }
+
+    std::cerr << "    end purning " << std::endl;
+
+    //unmap indices
+    if (indices != NULL) {
+      this->map_indices(edgesOut, indices, M, K);
+    }
+
+    memcpy(edges, edgesOut, count*K*sizeof(int));
+    delete edgesOut;
 }

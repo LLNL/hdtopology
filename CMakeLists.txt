@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 option(ENABLE_PYTHON "Enable python binding" On)
+option(ENABLE_STREAMING "Enable streaming topology computation" On)
 option(ENABLE_PACKAGING "Enable packaging for PyPI" Off)
 option(ENABLE_CUDA "Enable GPU graph pruning" Off)
 
