@@ -103,8 +103,9 @@ void Graph::build(float *X, int N, int D)
     }
     */
 #else
-    mQuerySize = 10000; //if on CPU
-    // mQuerySize = 100000; //if on CPU
+    if(mQuerySize<0)
+        mQuerySize = 1000000; //if on CPU
+
 #endif
 
     fprintf(stderr, "mQuerySize: %d   mCount: %d \n", mQuerySize, mCount);

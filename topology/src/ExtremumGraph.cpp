@@ -555,6 +555,8 @@ void ExtremumGraphExt::computeSegmentation(const HDData* data, const Flags* flag
 
   eIt.reset();
 
+  fprintf(stderr, "---- ExtremumGraphExt::Reset EdgeIterator ----\n");
+
   // Find the highest lower vertex of all edges that connect two different segments
   while (!eIt.end()) {
     e = *eIt;
