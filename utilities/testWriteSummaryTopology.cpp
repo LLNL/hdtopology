@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+
 #ifndef _MSC_VER
   #include <sys/time.h>
   #include <unistd.h>
@@ -29,6 +30,15 @@ using namespace ngl;
 #include <DataBlockHandle.h>
 
 #include <ostream>
+
+#ifdef ENABLE_FLANN
+  #include <FLANNSearchIndex.h>
+#endif
+
+#ifdef ENABLE_FAISS
+  #include <FAISSSearchIndex.h>
+#endif
+
 
 #ifdef _MSC_VER
 #include <Windows.h>
@@ -321,12 +331,22 @@ int main(int argc, char **argv)
   if (library.compare("ANN") == 0 || library.compare("ann") == 0) {
    index = new ANNSearchIndex(0);
   }
-  // else if (library.compare("FAISS") == 0 || library.compare("faiss") == 0) {
-  //  index = new FAISSSearchIndex();
-  // }
-  // else if (library.compare("FLANN") == 0 || library.compare("flann") == 0) {
-  //  index = new FLANNSearchIndex();
-  // }
+  else if (library.compare("FAISS") == 0 || library.compare("faiss") == 0) {
+#ifdef ENABLE_FAISS
+   index = new FAISSSearchIndex();
+#else
+    std::cerr << "Exit: Did't enable FAISS library\n" << std::endl;
+    exit(0);
+#endif
+  }
+  else if (library.compare("FLANN") == 0 || library.compare("flann") == 0) {
+#ifdef ENABLE_FLANN
+   index = new FLANNSearchIndex();
+#else
+   std::cerr << "Exit: Did't enable FLANN library\n" << std::endl;
+   exit(0);
+#endif
+  }
 
   NGLIterator it(x, N, D, K, relaxed, beta, lp, steps, Q, index);
   eg.initialize(&data, flags, it, true, 10, ExtremumGraphExt::ComputeMode::HISTOGRAM);

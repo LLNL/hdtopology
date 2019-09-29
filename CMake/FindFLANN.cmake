@@ -12,7 +12,7 @@ IF (FLANN_INCLUDE_DIRS)
 ENDIF (FLANN_INCLUDE_DIRS)
 
 FIND_PATH( FLANN_INCLUDE_DIR flann/flann.h
-           PATHS "external/flann/src/cpp/" "/usr/include" "../")
+PATHS "external/flann/src/cpp/" "/usr/include" "../" "../flann/src/cpp")
 
 if( WIN32 )
 
@@ -22,7 +22,7 @@ else (WIN32)
 
 FIND_LIBRARY( FLANN_LIBRARY
                NAMES flann
-               PATHS external/flann/build/lib ../faiss /lib /usr/lib /usr/lib64 /usr/local/lib)
+           PATHS external/flann/build/lib ../flann/build/lib /lib /usr/lib /usr/lib64 /usr/local/lib)
 
 endif( WIN32)
 

@@ -1,3 +1,12 @@
+if(ENABLE_FLANN)
+  ADD_DEFINITIONS(-DENABLE_FLANN)
+  INCLUDE_DIRECTORIES(${FLANN_INCLUDE_DIR})
+endif(ENABLE_FLANN)
+
+if(ENABLE_FAISS)
+  ADD_DEFINITIONS(-DENABLE_FAISS)
+endif(ENABLE_FAISS)
+
 IF(ENABLE_STREAMING)
   ADD_DEFINITIONS(-DENABLE_STREAMING)
 ENDIF(ENABLE_STREAMING)
@@ -32,20 +41,21 @@ else()
 
   ADD_EXECUTABLE(testWriteSummaryTopology testWriteSummaryTopology.cpp)
   TARGET_LINK_LIBRARIES(testWriteSummaryTopology ${ANN_LIBRARY} chdtopology hdfileformat cngl)
+endif()
 
-  # ADD_EXECUTABLE(testWriteStreamingTopology testWriteStreamingTopology.cpp)
-  # TARGET_LINK_LIBRARIES(testWriteStreamingTopology ${ANN_LIBRARY} chdtopology hdfileformat)
+if(ENABLE_FLANN)
+  TARGET_LINK_LIBRARIES(testWriteSummaryTopology ${LZ4_LIBRARY} ${FLANN_LIBRARY})
+endif()
 
-  SET(INSTALL_FILES
+SET(INSTALL_FILES
       ${CMAKE_SOURCE_DIR}/utilities/testReadSummaryTopology.py
       ${CMAKE_SOURCE_DIR}/utilities/testWriteSummaryTopology.py
       ${CMAKE_SOURCE_DIR}/deploy/deployConfig.py
-  )
+)
 
-  INSTALL(FILES ${INSTALL_FILES}
-          DESTINATION ${CMAKE_BINARY_DIR}
-  )
-  INSTALL(TARGETS testWriteSummaryTopology  testReadSummaryTopology
-        DESTINATION ${CMAKE_BINARY_DIR}
-  )
-endif()
+INSTALL(FILES ${INSTALL_FILES}
+      DESTINATION ${CMAKE_BINARY_DIR}
+)
+INSTALL(TARGETS testWriteSummaryTopology  testReadSummaryTopology
+    DESTINATION ${CMAKE_BINARY_DIR}
+)
