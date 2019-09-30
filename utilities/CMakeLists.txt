@@ -31,9 +31,6 @@ if (ENABLE_CUDA)
 
     ADD_EXECUTABLE(testWriteSummaryTopology testWriteSummaryTopology.cpp)
     TARGET_LINK_LIBRARIES(testWriteSummaryTopology ${ANN_LIBRARY} ${CUDA_LIBRARIES} chdtopology hdfileformat)
-
-    # ADD_EXECUTABLE(testWriteStreamingTopology testWriteStreamingTopology.cpp)
-    # TARGET_LINK_LIBRARIES(testWriteStreamingTopology ${ANN_LIBRARY} ${CUDA_LIBRARIES} chdtopology hdfileformat)
 else()
 
   ADD_EXECUTABLE(testReadSummaryTopology testReadSummaryTopology.cpp)
@@ -44,7 +41,7 @@ else()
 endif()
 
 if(ENABLE_FLANN)
-  TARGET_LINK_LIBRARIES(testWriteSummaryTopology ${LZ4_LIBRARY} ${FLANN_LIBRARY})
+  TARGET_LINK_LIBRARIES(testWriteSummaryTopology ${ANN_LIBRARY} ${LZ4_LIBRARY} ${FLANN_LIBRARY})
 endif()
 
 SET(INSTALL_FILES
