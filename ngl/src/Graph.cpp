@@ -9,6 +9,7 @@
 #include "SearchIndex.h"
 #include "ngl_cuda.h"
 #include <cstdlib>
+#include <cstring>
 #include <algorithm>
 #include <vector>
 #include <unordered_set>
