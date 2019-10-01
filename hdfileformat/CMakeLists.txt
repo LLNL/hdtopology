@@ -1,6 +1,5 @@
 include_directories(
    ./
-   #./external/
 )
 
 IF (${CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT})
@@ -9,7 +8,6 @@ ENDIF()
 
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(utilities)
-#ADD_SUBDIRECTORY(external)
 
 IF (ENABLE_PYTHON)
     ADD_SUBDIRECTORY(python)
