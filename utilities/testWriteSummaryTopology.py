@@ -26,8 +26,8 @@ def ackley(domain, d=3):
 f = ackley(sample)
 
 method = "RelaxedGabriel"
-max_neighbors = 150
-beta = 0.75
+max_neighbors = 500
+beta = 1.0
 
 ### provide recarray for data input ###
 data = np.concatenate((sample, np.matrix(f).T), axis=1).astype('f')
@@ -41,7 +41,7 @@ print(edges, type(edges), edges.dtype)
 ### compute topology
 eg = hdt.ExtremumGraphExt()
 flag_array = np.array([0],dtype=np.uint8)
-eg.initialize(data, flag_array, edges, False,10,2)
+eg.initialize(data, flag_array, edges, True ,10, 1)
 
 mc = DataBlockHandle()
 mc.idString("TDA");

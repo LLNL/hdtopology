@@ -174,8 +174,10 @@ std::vector<std::vector<uint32_t> > ExtremumGraphExt::segmentation(uint32_t coun
 {
   // ! Segmentation method for Histogram
 
-  if (mSegments.size()==0)
+  if (mSegments.size()==0){
+    // fprintf(stderr, "mSegments size is zero\n");
     return segmentHist(count);
+  }
 
   uint32_t r;
   uint32_t pre_size;
@@ -251,6 +253,7 @@ std::vector<uint32_t> ExtremumGraphExt::segment(uint32_t ext, uint32_t count, fl
 uint32_t ExtremumGraphExt::segmentSize(uint32_t ext, uint32_t count, float threshold)
 {
   int32_t v = activeExtremum(ext,count);
+  // fprintf(stderr, "activeExtremum: %d\n", v);
 
   if (v < 0)
     return 0;
