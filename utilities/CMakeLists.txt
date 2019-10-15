@@ -45,6 +45,10 @@ if(ENABLE_FLANN)
   TARGET_LINK_LIBRARIES(testWriteSummaryTopology ${ANN_LIBRARY} ${LZ4_LIBRARY} ${FLANN_LIBRARY})
 endif()
 
+if(ENABLE_OPENMP)
+  target_link_libraries(testWriteSummaryTopology ${ANN_LIBRARY} ${LZ4_LIBRARY} ${FLANN_LIBRARY} PRIVATE OpenMP::OpenMP_CXX)
+endif()
+
 SET(INSTALL_FILES
       ${CMAKE_SOURCE_DIR}/utilities/testReadSummaryTopology.py
       ${CMAKE_SOURCE_DIR}/utilities/testWriteSummaryTopology.py

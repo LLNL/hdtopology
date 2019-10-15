@@ -8,6 +8,7 @@ option(ENABLE_PACKAGING "Enable packaging for PyPI" Off)
 option(ENABLE_CUDA "Enable GPU graph pruning" Off)
 
 option(ENABLE_FLANN "Enable FLANN for neighborhood lookup" Off)
+option(ENABLE_OPENMP "Enable OpenMP for FLANN" Off)
 
 if(ENABLE_CUDA)
   project(hdtopology CXX CUDA)
@@ -20,7 +21,12 @@ if(ENABLE_FLANN)
     find_package(LZ4 REQUIRED)
 endif()
 
+if(ENABLE_OPENMP)
+  find_package(OpenMP REQUIRED)
+endif()
+
 set(CMAKE_CXX_STANDARD 11)
+# set(CMAKE_VERBOSE_MAKEFILE ON)
 
 if(WIN32)
   set(CMAKE_SHARED_LINKER_FLAGS "/FORCE:MULTIPLE")

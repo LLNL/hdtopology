@@ -32,6 +32,7 @@ if(FLANN_FOUND)
   list(APPEND NGL_LINK_LIB ${FLANN_LIBRARY})
 endif(FLANN_FOUND)
 
+
 INCLUDE_DIRECTORIES(
     ${NGL_INC}
 )
@@ -45,6 +46,10 @@ else()
   add_library(cngl STATIC ${NGL_SRC})
   link_libraries(cngl ${NGL_LINK_LIB})
 endif(ENABLE_CUDA)
+
+if(ENABLE_OPENMP)
+  target_link_libraries(cngl PRIVATE OpenMP::OpenMP_CXX)
+endif()
 
 set_target_properties(cngl PROPERTIES POSITION_INDEPENDENT_CODE ON)
 # SWIG_LINK_LIBRARIES(ngl ${Python3_LIBRARIES} ${ANN_LIBRARY})
