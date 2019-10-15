@@ -46,7 +46,7 @@ if(ENABLE_FLANN)
 endif()
 
 if(ENABLE_OPENMP)
-  target_link_libraries(testWriteSummaryTopology ${ANN_LIBRARY} ${LZ4_LIBRARY} ${FLANN_LIBRARY} PRIVATE OpenMP::OpenMP_CXX)
+  target_link_libraries(testWriteSummaryTopology OpenMP::OpenMP_CXX)
 endif()
 
 SET(INSTALL_FILES

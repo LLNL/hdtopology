@@ -21,6 +21,7 @@ public:
   void search(int startIndex, int count, int K, int *k_indices, float *distances=NULL);
 private:
     int D;
+    int threadNum;
     Matrix<float> *dataset;
     flann::Index<flann::L2<float> > *index;
 };

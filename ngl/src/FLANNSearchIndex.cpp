@@ -10,6 +10,7 @@
 
 void FLANNSearchIndex::fit(float *X, int N, int dimensionality)
 {
+    this->threadNum = 0;
     D = dimensionality;
     dataset = new flann::Matrix<float>(X, N, D);
     // construct an randomized kd-tree index using 4 kd-trees
@@ -31,7 +32,7 @@ void FLANNSearchIndex::search(int *indices, int N, int K, int *k_indices, float 
     flann::SearchParams params;
     params.checks = 128;
     params.eps = 0;
-    params.cores = 0;
+    params.cores = this->threadNum;
     //params.matrices_in_gpu_ram = ?;
 
     index->knnSearch(query, knn, dists, K, params);
@@ -47,7 +48,7 @@ void FLANNSearchIndex::search(int startIndex, int count, int K, int *k_indices, 
     flann::SearchParams params;
     params.checks = 128;
     params.eps = 0;
-    params.cores = 0;
+    params.cores = this->threadNum;
     //params.matrices_in_gpu_ram = ?;
     index->knnSearch(query, indices, dists, K, params);
 }
