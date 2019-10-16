@@ -40,8 +40,8 @@ using namespace ngl;
   #include <FAISSSearchIndex.h>
 #endif
 
-#include <HDFileFormat/DataCollectionHandle.h>
-#include <HDFileFormat/DataBlockHandle.h>
+#include <DataCollectionHandle.h>
+#include <DataBlockHandle.h>
 #include "binaryFileLoader.h"
 
 #include <ostream>
