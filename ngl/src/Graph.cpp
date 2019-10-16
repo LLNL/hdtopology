@@ -16,6 +16,11 @@
 #include <iostream>
 #include <cmath>
 
+#ifdef ENABLE_OPENMP
+  #include <omp.h>
+  #include <cstdio>
+#endif
+
 Graph::Graph(SearchIndex *index,
              int maxNeighbors,
              bool relaxed,
@@ -421,12 +426,20 @@ void Graph::prune(float *X, int *edges, int *indices, int N, int D, int M, int K
   std::cerr << "    begin purning ... " << std::endl;
 
   if(relaxed){
+    int i;
+
+    std::cerr << "      relax graph ... " << std::endl;
+
+#ifdef ENABLE_OPENMP
+   #pragma omp parallel
+#endif
+    {
     float *p, *q, *r;
 
     float pq[50] = {};
     float pr[50] = {};
 
-    int i, j, k, k2, d, n;
+    int  j, k, k2, d, n;
     float t;
 
     float length_squared;
@@ -436,7 +449,9 @@ void Graph::prune(float *X, int *edges, int *indices, int N, int D, int M, int K
     ////////////////////////////////////////////////////////////
     float xC, yC, radius, y;
     ////////////////////////////////////////////////////////////
-
+#ifdef ENABLE_OPENMP
+    #pragma omp for 
+#endif
     for (i = 0; i < count; i++) {
         for (k = 0; k < K; k++) {
             p = &(X[D*i]);
@@ -506,6 +521,7 @@ void Graph::prune(float *X, int *edges, int *indices, int N, int D, int M, int K
             }
         }
     }
+    }
   }else{
     float *p, *q, *r;
 
@@ -523,8 +539,12 @@ void Graph::prune(float *X, int *edges, int *indices, int N, int D, int M, int K
     float xC, yC, radius, y;
     ////////////////////////////////////////////////////////////
 
-    for (k = 0; k < K; k++) {
-        for (i = 0; i < count; i++) {
+#ifdef ENABLE_OPENMP
+    printf("thread num: %d\n", omp_get_num_threads() );
+    #pragma omp parallel for 
+#endif
+    for (i = 0; i < count; i++) {
+        for (k = 0; k < K; k++) {
             p = &(X[D*i]);
             j = edges[K*i+k];
             q = &(X[D*j]);
