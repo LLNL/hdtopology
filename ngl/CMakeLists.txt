@@ -3,4 +3,7 @@ FIND_PATH( NGL_INCLUDE_DIR ngl.h
 find_package(ANN REQUIRED)
 
 add_subdirectory(src)
+
+if(ENABLE_PYTHON)
 add_subdirectory(python)
+endif()
