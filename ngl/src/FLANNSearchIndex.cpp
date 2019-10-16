@@ -37,7 +37,7 @@ void FLANNSearchIndex::search(int *indices, int N, int K, int *k_indices, float 
 
     index->knnSearch(query, knn, dists, K, params);
 
-    delete xq;
+    delete [] xq;
 }
 
 void FLANNSearchIndex::search(int startIndex, int count, int K, int *k_indices, float *distances)

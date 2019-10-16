@@ -39,14 +39,19 @@ else()
 
   ADD_EXECUTABLE(testWriteSummaryTopology testWriteSummaryTopology.cpp)
   TARGET_LINK_LIBRARIES(testWriteSummaryTopology ${ANN_LIBRARY} chdtopology hdfileformat cngl)
+
+  ADD_EXECUTABLE(computeTopologyFromBinary computeTopologyFromBinary.cpp)
+  TARGET_LINK_LIBRARIES(computeTopologyFromBinary ${ANN_LIBRARY} chdtopology hdfileformat cngl)
 endif()
 
 if(ENABLE_FLANN)
   TARGET_LINK_LIBRARIES(testWriteSummaryTopology ${ANN_LIBRARY} ${LZ4_LIBRARY} ${FLANN_LIBRARY})
+  TARGET_LINK_LIBRARIES(computeTopologyFromBinary ${ANN_LIBRARY} ${LZ4_LIBRARY} ${FLANN_LIBRARY})
 endif()
 
 if(ENABLE_OPENMP)
   target_link_libraries(testWriteSummaryTopology OpenMP::OpenMP_CXX)
+  target_link_libraries(computeTopologyFromBinary OpenMP::OpenMP_CXX)
 endif()
 
 SET(INSTALL_FILES
@@ -58,6 +63,6 @@ SET(INSTALL_FILES
 INSTALL(FILES ${INSTALL_FILES}
       DESTINATION ${CMAKE_BINARY_DIR}
 )
-INSTALL(TARGETS testWriteSummaryTopology  testReadSummaryTopology
+INSTALL(TARGETS testWriteSummaryTopology  testReadSummaryTopology computeTopologyFromBinary
     DESTINATION ${CMAKE_BINARY_DIR}
 )

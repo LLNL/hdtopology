@@ -437,6 +437,7 @@ void Graph::prune(float *X, int *edges, int *indices, int N, int D, int M, int K
     float xC, yC, radius, y;
     ////////////////////////////////////////////////////////////
 
+    #pragma omp for
     for (i = 0; i < count; i++) {
         for (k = 0; k < K; k++) {
             p = &(X[D*i]);
@@ -523,8 +524,10 @@ void Graph::prune(float *X, int *edges, int *indices, int N, int D, int M, int K
     float xC, yC, radius, y;
     ////////////////////////////////////////////////////////////
 
-    for (k = 0; k < K; k++) {
-        for (i = 0; i < count; i++) {
+    ///////////// old order is K first /////////////
+    for (i = 0; i < count; i++) {
+      for (k = 0; k < K; k++) {
+
             p = &(X[D*i]);
             j = edges[K*i+k];
             q = &(X[D*j]);

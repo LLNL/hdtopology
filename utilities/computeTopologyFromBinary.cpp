@@ -40,6 +40,11 @@ using namespace ngl;
   #include <FAISSSearchIndex.h>
 #endif
 
+#include <HDFileFormat/DataCollectionHandle.h>
+#include <HDFileFormat/DataBlockHandle.h>
+#include "binaryFileLoader.h"
+
+#include <ostream>
 
 #ifdef _MSC_VER
 #include <Windows.h>
@@ -66,7 +71,6 @@ int gettimeofday(struct timeval* tp, struct timezone* tzp)
 }
 
 #endif
-
 
 namespace Color {
     enum Code {
@@ -103,10 +107,10 @@ static inline timestamp now()
 }
 
 class CommandLine {
-  std::vector<std::string> argnames;
+	std::vector<std::string> argnames;
   std::map<std::string, std::string> args;
-  std::map<std::string, std::string> descriptions;
-  std::vector<std::string> requiredArgs;
+	std::map<std::string, std::string> descriptions;
+	std::vector<std::string> requiredArgs;
   public:
     CommandLine() { }
     void addArgument(std::string cmd, std::string defaultValue, std::string description="", bool required = false) {
@@ -164,68 +168,28 @@ class CommandLine {
     }
 };
 
-double Ackley(float *x, int d)
-{
-    double sum = 0;
-    double theta1;
-    double theta2;
-
-    for (int i = 0; i < d - 1; i++)
-    {
-        theta1 = 6 * x[i] - 3;
-        theta2 = 6 * x[i + 1] - 3;
-        sum -= exp(-0.2) * sqrt(pow(theta1, 2) + pow(theta2, 2)) + 3 * (cos(2 * theta1) + sin(2 * theta2));
-        //sum+= 20*exp(-0.2*sqrt(0.5*(pow(x[i],2)+pow(x[i+1],2))))-exp(0.5*(cos(2*3.1415926*x[i])+cos(2*3.1415926*x[i])))+20;
-    }
-    return sum;
-}
-
-double Ackleysfu(float *x, int d)
-{
-
-    double sum1 = 0;
-    double sum2 = 0;
-
-    //double theta1;
-    //double theta2;
-
-    double a = 20;
-    double b = 0.2;
-    double c = 2*3.1415926536;
-
-    for (int i = 0; i < d; i++)
-    {
-        //theta1 = 6 * x[i] - 3;
-        //theta2 = 6 * x[i + 1] - 3;
-        //sum -= exp(-0.2) * sqrt(pow(theta1, 2) + pow(theta2, 2)) + 3 * (cos(2 * theta1) + sin(2 * theta2));
-        //sum+= 20*exp(-0.2*sqrt(0.5*(pow(x[i],2)+pow(x[i+1],2))))-exp(0.5*(cos(2*3.1415926*x[i])+cos(2*3.1415926*x[i])))+20;
-      sum1+=pow((x[i]-0.5)*32,2);
-      sum2+=cos(c*(x[i]-0.5)*32);
-    }
-
-    return -a*exp(-b*sqrt(sum1/d))-exp(sum2/d)+a+exp(1);
-    //return sum;
-}
-
-
 int main(int argc, char **argv)
 {
   timestamp t1 = now();
   timestamp t2;
   CommandLine cl;
-  cl.addArgument("-d", "2", "Number of dimensions", false);
-  cl.addArgument("-c", "10000", "Number of points", false);
-  cl.addArgument("-a", "-1", "Number of attributes", false);
-  cl.addArgument("-f", "-1", "Index for function value", false);
-  cl.addArgument("-q", "-1", "Query Size for NGLIterator", false);
-  cl.addArgument("-l", "ann", "Neighborhood query library", false);
 
-  cl.addArgument("-k", "500", "K max", false);
+  // cl.addArgument("-c", "1000000", "Number of points", true);
+  cl.addArgument("-a", "-1", "Number of attributes", false);
+  // cl.addArgument("-d", "2", "Number of dimensions", true);
+  // cl.addArgument("-f", "-1", "Index for function value", false);
+  cl.addArgument("-f", "Ye", "string for the function", false);
+  cl.addArgument("-q", "-1", "QuerySize for NGLIterator", false);
+
+  cl.addArgument("-k", "-1", "K max", false);
   cl.addArgument("-b", "1.0", "Beta", false);
+  cl.addArgument("-g", "0", "KNN", false);
   cl.addArgument("-p", "2.0", "Lp-norm", false);
   cl.addArgument("-r", "1", "Relaxed", false);
   cl.addArgument("-s", "-1", "# of Discretization Steps. Use -1 to disallow discretization.", false);
-  cl.addArgument("-o", "summaryTopologyTest.hdff", "Output file name", false);
+  cl.addArgument("-o", "output.hdff", "Output file name", false);
+  cl.addArgument("-i", "input.txt", "Input meta file name", true);
+
   bool hasArguments = cl.processArgs(argc, argv);
   if(!hasArguments) {
     fprintf(stderr, "Missing arguments\n");
@@ -234,37 +198,45 @@ int main(int argc, char **argv)
     exit(1);
   }
 
-  int D = cl.getArgInt("-d");
-  int N = cl.getArgInt("-c");
+  // int D = cl.getArgInt("-d");
   int Q = cl.getArgInt("-q");
-  // total attrs and index for function value
-
   int A = cl.getArgInt("-a");
-  if(A==-1)
-    A = D+1;
 
-  int F = cl.getArgInt("-f");
-  // if not set, use last attr
-  if(F==-1)
-    F = A-1;
+  // int F = cl.getArgInt("-f");
+  std::string func = cl.getArgString("-f");
 
   int K = cl.getArgInt("-k");
+  std::string input_name = cl.getArgString("-i");
   std::string out_name = cl.getArgString("-o");
   int steps = cl.getArgInt("-s");
 
   //bool discrete = steps > 0;
-
   bool relaxed = cl.getArgInt("-r") > 0;
+  bool KNN = cl.getArgInt("-g") > 0;
   float beta = cl.getArgFloat("-b");
   float lp = cl.getArgFloat("-p");
 
+
+  std::vector<float> buffer;
+  std::vector<std::string> attrs;
+  int N, D;
+
+  if(!loadBin(input_name, func, buffer, N, D, attrs))
+    fprintf(stderr, "fail to load file: %s", input_name.c_str());
+
+  for(size_t i=0; i<attrs.size(); i++)
+    fprintf(stderr, " \t %s \n ", attrs[i].c_str());
+  //set default attribution
+  if(A==-1)
+    A = D+1;
+
+  // if not set, use last attr
+  int F = -1;
+  if(F==-1)
+    F = A-1;
+
   // Load data set and edges from files
-  float *x;
-  float *xy;
-
-  //int i, d, k;
-  int i, d;
-
+  int i;
 
   // Adding colors for terminal output
   Color::Modifier red(Color::FG_RED);
@@ -272,43 +244,47 @@ int main(int argc, char **argv)
   Color::Modifier blue(Color::FG_BLUE);
   Color::Modifier def(Color::FG_DEFAULT);
 
-  x = new float[N*D];
-  xy = new float[N*A];
+  // x = new float[N*D];
+  // xy = new float[N*(D+1)];
+  // std::vector<std::string> attrs;
 
-  std::vector<std::string> attrs;
-  for(i=0; i<A; i++)
-  {
-    if (i!=F)
-      attrs.push_back(std::string("X")+std::to_string(i));
-    else
-      attrs.push_back(std::string("f"));
-  }
+  // for(i=0; i<D; i++)
+  //   attrs.push_back(std::string("X")+std::to_string(i));
+  // attrs.push_back(std::string("f"));
+  float *x;
+  float *xy;
+  x = new float[N*D];
+  xy = &buffer[0];
+  // xy = new float[N*A];
+
+  // std::vector<std::string> attrs;
+  // for(i=0; i<A; i++)
+  // {
+  //   if (i!=F)
+  //     attrs.push_back(std::string("X")+std::to_string(i));
+  //   else
+  //     attrs.push_back(std::string("f"));
+  // }
 
   t2 = now();
   std::cerr << blue << "Setup and Memory Allocation " << t2-t1 << " s" << def << std::endl;
   t1 = now();
 
-  srand(0);
-//   std::ofstream ofs;
-//   ofs.open("points.txt");
-  for (i = 0; i < N; i++)
+  // std::ifstream in(input_name,std::ios_base::binary);
+  // in.read( reinterpret_cast<char *>(&xy[0]), A*N*sizeof(float) );
+
+  std::cout << D << ' ' << N << '\n' << input_name<< ' ';
+
+  for(unsigned i = 0 ; i < N ; ++i )
   {
-      for (d = 0; d < D; d++)
+      for (unsigned j = 0; j<D; ++j)
       {
-          xy[i*A+d] = x[i * D + d] = (float)rand() / RAND_MAX;
-          //xy[i*(D+1)+d] = x[i * D + d] = ((float)rand() / RAND_MAX-0.5)*8;
-
-          //ofs << x[i * D + d] << " ";
+        x[i*D+j] = xy[i*A+j];
       }
-      //ofs << std::endl;
   }
-  //ofs.close();
 
-  for(i = 0; i < N; i++) {
-      //xy[i*(D+1)+D] = Ackley(x+(i*D), D);
-      for(int ind = D; ind<A; ind++)
-        xy[i*A+ind] = -Ackley(x+(i*D), D)-ind;
-  }
+  // in.close();
+  //////////////////
 
   HDData data;
   data.size(N);
@@ -318,8 +294,9 @@ int main(int argc, char **argv)
   data.attributes(attrs);
   data.data(xy);
 
+
   t2 = now();
-  std::cerr << blue << "Generating Data " << t2 - t1 << " s" << def << std::endl;
+  std::cerr << blue << "loading Data " << t2 - t1 << " s" << def << std::endl;
   t1 = now();
 
   //////////////// Compute Extrema Graph ////////////////
@@ -381,9 +358,7 @@ int main(int argc, char **argv)
   t2 = now();
   std::cerr << blue << "Building Extremum Graph with NGL: " << t2-t1 << " s" << def << std::endl;
   t1 = now();
-
 #endif
-
 
   HDFileFormat::DataBlockHandle mc;
   mc.idString("TDA");
@@ -392,7 +367,7 @@ int main(int argc, char **argv)
   dataset.add(mc);
 
   HDFileFormat::DataCollectionHandle group(out_name);
-  //HDFileFormat::DataCollectionHandle group("topo_5d_10M_k250.hdff");
+
   group.add(dataset);
   group.write();
 
@@ -400,12 +375,12 @@ int main(int argc, char **argv)
   std::cerr << blue << "Output " << t2-t1 << " s" << def << std::endl;
   t1 = now();
 
-  // Free memory
+  // // Free memory
   delete [] x;
-  delete [] xy;
+  // delete [] xy;
 
   t2 = now();
   std::cerr << blue << "Clean-up " << t2-t1 << " s" << def << std::endl;
 
-  return 0;
+   return 0;
 }
