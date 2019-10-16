@@ -180,6 +180,7 @@ int main(int argc, char **argv)
   // cl.addArgument("-f", "-1", "Index for function value", false);
   cl.addArgument("-f", "Ye", "string for the function", false);
   cl.addArgument("-q", "-1", "QuerySize for NGLIterator", false);
+  cl.addArgument("-l", "ann", "Neighborhood query library", false);
 
   cl.addArgument("-k", "-1", "K max", false);
   cl.addArgument("-b", "1.0", "Beta", false);
@@ -224,8 +225,10 @@ int main(int argc, char **argv)
   if(!loadBin(input_name, func, buffer, N, D, attrs))
     fprintf(stderr, "fail to load file: %s", input_name.c_str());
 
+  fprintf(stderr, "\nAttributes:\n");
   for(size_t i=0; i<attrs.size(); i++)
-    fprintf(stderr, " \t %s \n ", attrs[i].c_str());
+    fprintf(stderr, "  %s \n ", attrs[i].c_str());
+
   //set default attribution
   if(A==-1)
     A = D+1;
@@ -306,6 +309,7 @@ int main(int argc, char **argv)
 #ifdef ENABLE_STREAMING
   SearchIndex *index = NULL;
   std::string library = cl.getArgString("-l");
+  fprintf(stderr, "using %s library\n", library.c_str());
   if (library.compare("ANN") == 0 || library.compare("ann") == 0) {
    index = new ANNSearchIndex(0);
   }
