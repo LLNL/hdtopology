@@ -207,6 +207,8 @@ int main(int argc, char **argv)
   std::string func = cl.getArgString("-f");
 
   int K = cl.getArgInt("-k");
+  if (K==-1)
+     K=500; 
   std::string input_name = cl.getArgString("-i");
   std::string out_name = cl.getArgString("-o");
   int steps = cl.getArgInt("-s");

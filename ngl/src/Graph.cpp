@@ -131,8 +131,10 @@ void Graph::populate()
 {
     if (mChunked)
     {
+        fprintf(stderr, " populate size: %d\n", mQuerySize * mMaxNeighbors); 
         mEdges = new int[mQuerySize * mMaxNeighbors];
         mDistances = new float[mQuerySize * mMaxNeighbors];
+        fprintf(stderr, " done allocate populate size: %d\n", mQuerySize * mMaxNeighbors); 
         populate_chunk(0);
     }
     else
