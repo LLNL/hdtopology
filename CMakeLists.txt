@@ -7,6 +7,8 @@ option(ENABLE_STREAMING "Enable streaming topology computation" On)
 option(ENABLE_PACKAGING "Enable packaging for PyPI" Off)
 option(ENABLE_CUDA "Enable GPU graph pruning" Off)
 
+option(ENABLE_UTILTIES "Compile c++ utilities" ON)
+
 option(ENABLE_FLANN "Enable FLANN for neighborhood lookup" Off)
 option(ENABLE_OPENMP "Enable OpenMP for FLANN" Off)
 
