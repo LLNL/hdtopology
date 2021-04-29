@@ -32,7 +32,7 @@ except ImportError:
 
 setuptools.setup(
     name="hdff",
-    version="0.0.0",
+    version="0.0.1",
     author="Shusen Liu, Peer-Timo Bremer",
     author_email="liu42@llnl.gov, bremer5@llnl.gov",
     description="File Format Library for NDDAV System",
