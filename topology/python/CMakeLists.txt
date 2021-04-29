@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-cmake_policy(SET CMP0086 NEW)
+#cmake_policy(SET CMP0086 NEW)
 cmake_policy(SET CMP0078 NEW)
 
 find_package(SWIG REQUIRED)
@@ -8,7 +8,7 @@ find_package(SWIG REQUIRED)
 INCLUDE(${SWIG_USE_FILE})
 
 set(CMAKE_FIND_FRAMEWORK LAST)
-find_package(Python3 COMPONENTS Interpreter Development NumPy REQUIRED)
+find_package(Python3 COMPONENTS Development NumPy)
 
 set(CMAKE_VERBOSE_MAKEFILE YES)
 
