@@ -16,7 +16,6 @@
 #include <DataBlockHandle.h>
 // #endif
 
-
 //! Forward declaration
 class EdgeIterator;
 
