@@ -32,9 +32,9 @@ beta = 1.0
 ### provide recarray for data input ###
 data = np.concatenate((sample, np.matrix(f).T), axis=1).astype('f')
 names = ['X1', 'X2', 'X3', 'f']
-types = ['f4']*(d+1)
+types = ['<f4']*(d+1)
 data = data.view(dtype=list(zip(names,types)) ).view(np.recarray)
-print(data)
+print(data.dtype)
 ### provide array of unint32 for the edges
 edges = ngl.getSymmetricNeighborGraph(method, sample, max_neighbors,beta)
 print(edges, type(edges), edges.dtype)
