@@ -1323,16 +1323,16 @@ bool ExtremumGraphExt::save(HDFileFormat::DataBlockHandle &handle){
 void ExtremumGraphExt::serialize(std::ostream &output){
   cereal::BinaryOutputArchive binAR(output);
   // cereal::XMLOutputArchive binAR(output);
-  binAR( this->mIndexMap, this->mAscending, this->mRange, this->mFunctionHist, this->mPointLocations, this->mFuncAttr);
+  binAR( this->mIndexMap, this->mAscending, this->mRange, this->mFunction, this->mFunctionHist, this->mPointLocations, this->mFuncAttr);
 }
 
 void ExtremumGraphExt::deserialize(std::istream &input, bool isIncludeFunctionIndexInfo){
   cereal::BinaryInputArchive binAR(input);
   // cereal::XMLInputArchive binAR(input);
   if(isIncludeFunctionIndexInfo)
-    binAR( this->mIndexMap, this->mAscending, this->mRange, this->mFunctionHist, this->mPointLocations, this->mFuncAttr);
+    binAR( this->mIndexMap, this->mAscending, this->mRange, this->mFunction, this->mFunctionHist, this->mPointLocations, this->mFuncAttr);
   else
   {
-    binAR( this->mIndexMap, this->mAscending, this->mRange, this->mFunctionHist, this->mPointLocations);
+    binAR( this->mIndexMap, this->mAscending, this->mRange, this->mFunction, this->mFunctionHist, this->mPointLocations);
   }
 }
