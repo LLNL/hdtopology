@@ -1,3 +1,5 @@
+if(ENABLE_UTILITIES)
+
 if(ENABLE_FLANN)
   ADD_DEFINITIONS(-DENABLE_FLANN)
   INCLUDE_DIRECTORIES(${FLANN_INCLUDE_DIR})
@@ -35,13 +37,14 @@ if (ENABLE_CUDA)
 else()
 
   ADD_EXECUTABLE(testReadSummaryTopology testReadSummaryTopology.cpp)
-  TARGET_LINK_LIBRARIES(testReadSummaryTopology ${ANN_LIBRARY} chdtopology hdfileformat)
+  TARGET_LINK_LIBRARIES(testReadSummaryTopology ${ANN_LIBRARY} chdtopology hdfileformat cngl)
 
   ADD_EXECUTABLE(testWriteSummaryTopology testWriteSummaryTopology.cpp)
   TARGET_LINK_LIBRARIES(testWriteSummaryTopology ${ANN_LIBRARY} chdtopology hdfileformat cngl)
 
   ADD_EXECUTABLE(computeTopologyFromBinary computeTopologyFromBinary.cpp)
   TARGET_LINK_LIBRARIES(computeTopologyFromBinary ${ANN_LIBRARY} chdtopology hdfileformat cngl)
+
 endif()
 
 if(ENABLE_FLANN)
@@ -66,3 +69,5 @@ INSTALL(FILES ${INSTALL_FILES}
 INSTALL(TARGETS testWriteSummaryTopology  testReadSummaryTopology computeTopologyFromBinary
     DESTINATION ${CMAKE_BINARY_DIR}
 )
+
+endif()

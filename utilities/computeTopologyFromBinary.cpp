@@ -23,7 +23,11 @@ using namespace ngl;
 
 #include <ExtremumGraph.h>
 #include <Graph.h>
+
+#ifdef ENABLE_STREAMING
 #include <ANNSearchIndex.h>
+#endif
+
 #include <NGLIterator.h>
 
 #include <Neighborhood.h>
@@ -208,7 +212,7 @@ int main(int argc, char **argv)
 
   int K = cl.getArgInt("-k");
   if (K==-1)
-     K=500; 
+     K=500;
   std::string input_name = cl.getArgString("-i");
   std::string out_name = cl.getArgString("-o");
   int steps = cl.getArgInt("-s");
