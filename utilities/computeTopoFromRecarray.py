@@ -41,7 +41,7 @@ def main():
     ### compute topology
     eg = hdt.ExtremumGraphExt()
     flag_array = np.array([0],dtype=np.uint8)
-    eg.initialize(data, flag_array, edges, True ,10, 1, args.data_cube_dim)
+    eg.initialize(data, flag_array, edges, True ,10, 0, args.data_cube_dim)
 
     mc = DataBlockHandle()
     mc.idString("TDA");

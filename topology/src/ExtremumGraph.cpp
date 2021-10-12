@@ -1254,16 +1254,18 @@ bool ExtremumGraphExt::load(HDFileFormat::DataBlockHandle &handle, bool isInclud
       mDistributions[i].load(distHandleList[i]);
     }
 
-    if(!isIncludeFunctionIndexInfo)
-      mFuncAttr = mDistributions[0].getAttr().size()-1;
+    if(distHandleList.size()!=0){
+        if(!isIncludeFunctionIndexInfo)
+          mFuncAttr = mDistributions[0].getAttr().size()-1;
 
-    mCubeDim = cube_dim;
+        mCubeDim = cube_dim;
 
-    // Find the highest resolution for the data cube
-    uint32_t resolution = mDistributions[0].get(mDistributions[0].getAttr()[mFuncAttr]).resolution();
+        // Find the highest resolution for the data cube
+        uint32_t resolution = mDistributions[0].get(mDistributions[0].getAttr()[mFuncAttr]).resolution();
 
-    // std::cout<< "Highest Res in the cube = "<< resolution<<"\n";
-    mSelectivity = Selectivity(mDistributions, mFuncAttr, mCubeDim, resolution);
+        std::cout<< "Highest Res in the cube = "<< resolution<<"\n";
+        mSelectivity = Selectivity(mDistributions, mFuncAttr, mCubeDim, resolution);
+    }
 
     return true;
 }
