@@ -1,0 +1,133 @@
+import os
+import argparse
+import numpy as np
+
+from hdff import *
+import hdtopology as hdt
+import pandas as pd
+
+import matplotlib.pyplot as plt
+from sklearn.metrics import pairwise_distances
+
+def load_eg(filename):
+    collection = DataCollectionHandle()
+    collection.attach(filename)
+    dataset = collection.dataset(0)
+    # load EG
+    eg = hdt.ExtremumGraphExt()
+    handle = dataset.getDataBlock(0)
+    isIncludeFunctionIndexInfo = False
+    # cube_dim = 2
+
+    eg.load(handle, isIncludeFunctionIndexInfo)
+
+    ##### test query ######
+    # attrs = eg.getJoint().getAttr()
+    # print("Attrs:", attrs)
+    # hist = eg.getHist(attrs[:2])
+    # print("Histogram Bin Value Range:", hist.min(), hist.max())
+
+    return eg
+
+def parse_args():
+    """Parses arguments."""
+    parser = argparse.ArgumentParser(description='Compute hdff file from recarray.')
+    parser.add_argument('--filename', type=str, help='Name of the input hdff datafile.', required=True)
+    parser.add_argument('--datafile', type=str, help='Name of the of original dataset in npy format')
+    # parser.add_argument('--datafile', type=str, help='Name of the of original dataset in npy format')
+
+    parser.add_argument('--extremaCount', type=int, help='number of extrema to sample from', default=10)
+    parser.add_argument('--samplePerExtrema', type=int, help='number of samples per extrema.', default=200)
+
+    parser.add_argument('--method', type=str, help='method for determine the samples', default='gaussian')
+    #### option, gaussian, gaussian_process ####
+
+    return parser.parse_args()
+
+def gaussian_sampling(ex, coreSamples, sampleCount):
+    sample_mean = np.mean(coreSamples, axis=0)
+    sample_covariance = np.cov(coreSamples)
+
+    return np.random.Generator.multivariate_normal(sample_mean, sample_covariance, size=sampleCount)
+
+def gaussian_process_sampling(ex, coreSamples, sampleCount):
+    pass
+
+
+def nearest_neigbors(ex, coreSamples, sampleCount):
+    ##
+    print(ex.shape, coreSamples.shape)
+    dist = np.linalg.norm(coreSamples - ex, axis=1)
+    print(dist)
+    max_dist = np.max(dist)
+    ## Generate random samples
+    identified = []
+    count = 0
+    while count<sampleCount:
+        batch = np.random.Generator.multivariate_normal(ex, max_dist*np.identity(len(ex)), 1000)
+
+        dist_mat = pairwise_distances(batch, coreSamples)
+        print(dist_mat)
+        len(dist_mat<0.08==True)
+        break
+
+    # plt.hist(dist)
+    # plt.show()
+
+# def lookup_samples(samples, indices):
+#     return samples[indices,:]
+
+def normalize_domain(domain, domain_min, domain_max):
+    return (domain-domain_min)/(domain_max-domain_min)
+
+def rescale_domain(domain, domain_min, domain_max):
+    return domain*(domain_max-domain_min)+domain_min
+
+def main():
+    """Main function."""
+    args = parse_args()
+    eg = load_eg(args.filename)
+
+    data = np.load(args.datafile)#[:,:-1]
+
+    domainNames = list(data.dtype.names[0:-1])
+    print(domainNames)
+    domain = data[domainNames]
+    domain = pd.DataFrame(domain).to_numpy()
+    print("domain:", domain.shape)
+
+    print("function domain:", domain.shape)
+    ##### get domain min max #####
+    domain_min = np.min(domain, axis=0)
+    domain_max = np.max(domain, axis=0)
+    print("domain min:", domain_min)
+    print("domain max:", domain_max)
+    # exit()
+    normalized_domain = normalized_domain(domain, domain_min, domain_max)
+    print("function range:", eg.minimum(), eg.maximum())
+
+    all_core_seg = {}
+    # all_core_samples = set()
+    for i, ex in enumerate(eg.extrema()):
+        ind = int(ex[2])
+        seg = eg.segment(ind, args.extremaCount, eg.minimum())
+        print("Seg:", len(seg), seg)
+        coreSeg = eg.coreSegment(ind, args.extremaCount)[1:]
+        print("coreSeg:", ind, len(coreSeg), coreSeg)
+        # print(ind in set(coreSeg))
+        # all_core_seg[ind] = coreSeg
+        # all_core_samples.add()
+        if args.method == 'gaussian':
+            sample_result = gaussian_sampling(normalized_domain[ind,:], normalized_domain[coreSeg,:], args.samplePerExtrema)
+        elif args.method == 'nearest_neigbors':
+            sample_result = nearest_neigbors(normalized_domain[ind,:], normalized_domain[coreSeg,:], args.samplePerExtrema)
+        elif args.method == 'gaussian_process':
+            sample_result = gaussian_process_sampling(normalized_domain[ind,:], normalized_domain[coreSeg,:], args.samplePerExtrema)
+        else:
+            print("method "+args.method+" is not recognized")
+            exit(0)
+        # break
+        # print(eg.coreSegment(ind, 2))
+
+if __name__ == '__main__':
+    main()
