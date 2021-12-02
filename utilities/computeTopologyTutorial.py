@@ -51,6 +51,7 @@ edges = np.array(edges,dtype=np.uint32)
 eg = hdt.ExtremumGraphExt()
 flag_array = np.array([0],dtype=np.uint8)
 eg.initialize(data, flag_array, edges, True ,10, 0)
+eg.convertToRelevance(data)
 
 fig = plt.figure(figsize=(1, 3))
 
@@ -64,7 +65,7 @@ plt.imshow(img)
 discrete = img.copy().flatten()
 
 # Get k number of segments
-segs = eg.segmentation(3)
+segs = eg.segmentation(4)
 
 for k,s in enumerate(segs):
     for i in s:

@@ -26,11 +26,12 @@ public:
 #ifndef SWIG
   struct Extremum {
     // Extremum(){}
-    Extremum(uint32_t i=0, float ff=0, uint32_t p=0) : id(i), f(ff), persistence(10e34), parent(p) {}
+    Extremum(uint32_t i=0, float ff=0, uint32_t p=0) : id(i), f(ff), persistence(10e34), parent(p), saddle(LNULL) {}
     uint32_t id;
     float f;
     float persistence;
     uint32_t parent;
+    uint32_t saddle;
   };
 
   struct Saddle {
@@ -83,6 +84,9 @@ public:
                   uint32_t max_segments, const ComputeMode mode, uint32_t cube_dim = 2,
                   uint32_t resolution = 128, int32_t target_attr = -1,
                   std::vector<HistogramType> histogramTypes = std::vector<HistogramType> (1, REGULAR));
+
+  //! Convert the persistence values into relevance
+  void convertToRelevance(const HDData* data);
 
   //! Return the segmentation for the given persistence
   uint32_t countForPersistence(float persistence);

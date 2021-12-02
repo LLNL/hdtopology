@@ -158,6 +158,30 @@ void ExtremumGraphExt::initialize(const HDData* data,
   fprintf(stderr, "finish compute histogram \n");
 }
 
+void ExtremumGraphExt::convertToRelevance(const HDData* data)
+{
+  std::vector<Extremum>::iterator it;
+
+  float root;
+
+  if (mAscending)
+    root = mRange[0];
+  else
+    root = mRange[1];
+
+  for (it=mExtrema.begin();it!=mExtrema.end();it++) {
+    fprintf(stderr,"Extremum %d Saddle %d persistence %f \n",it->id,it->saddle,it->persistence);
+    if (it->saddle != LNULL) { // If this extremum has been cancelled at all
+      it->persistence = it->persistence / fabs(it->f - mRange[0]);
+      mSaddles[it->saddle].persistence = it->persistence;
+      fprintf(stderr,"\t %f\n",it->persistence);
+    }
+  }
+
+  sort(data);
+}
+
+
 uint32_t ExtremumGraphExt::countForPersistence(float persistence)
 {
   unsigned int count=0;
@@ -675,6 +699,7 @@ void ExtremumGraphExt::computeHierarchy()
         // Need to cancel u
         mExtrema[u].parent = v;
         mExtrema[u].persistence = top.persistence;
+        mExtrema[u].saddle = top.saddle;
         mSaddles[top.saddle].persistence = top.persistence;
         mSaddles[top.saddle].cancellation = true;
       }
@@ -682,6 +707,7 @@ void ExtremumGraphExt::computeHierarchy()
         //fprintf(stderr,"Cancelling %d\n",mExtrema[v].id);
         mExtrema[v].parent = u;
         mExtrema[v].persistence = top.persistence;
+        mExtrema[v].saddle = top.saddle;
         mSaddles[top.saddle].persistence = top.persistence;
         mSaddles[top.saddle].cancellation = true;
       }
