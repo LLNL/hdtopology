@@ -158,7 +158,7 @@ void ExtremumGraphExt::initialize(const HDData* data,
   fprintf(stderr, "finish compute histogram \n");
 }
 
-void ExtremumGraphExt::convertToRelevance(const HDData* data)
+void ExtremumGraphExt::convertToRelevance(const HDData* data, float threshold)
 {
   std::vector<Extremum>::iterator it;
 
@@ -171,8 +171,13 @@ void ExtremumGraphExt::convertToRelevance(const HDData* data)
 
   for (it=mExtrema.begin();it!=mExtrema.end();it++) {
     fprintf(stderr,"Extremum %d Saddle %d persistence %f \n",it->id,it->saddle,it->persistence);
-    if (it->saddle != LNULL) { // If this extremum has been cancelled at all
-      it->persistence = it->persistence / fabs(it->f - mRange[0]);
+    if ((it->saddle != LNULL) && (it->persistence > threshold)) { // If this extremum has been cancelled at all
+      it->persistence = it->persistence / fabs(it->f - root);
+      mSaddles[it->saddle].persistence = it->persistence;
+      fprintf(stderr,"\t %f\n",it->persistence);
+    }
+    else if (it->saddle != LNULL) { // If this cancellation is below the threshold
+      it->persistence = it->persistence / fabs(mRange[0] - mRange[1]);
       mSaddles[it->saddle].persistence = it->persistence;
       fprintf(stderr,"\t %f\n",it->persistence);
     }

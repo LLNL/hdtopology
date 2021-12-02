@@ -86,7 +86,7 @@ public:
                   std::vector<HistogramType> histogramTypes = std::vector<HistogramType> (1, REGULAR));
 
   //! Convert the persistence values into relevance
-  void convertToRelevance(const HDData* data);
+  void convertToRelevance(const HDData* data, float threshold=0);
 
   //! Return the segmentation for the given persistence
   uint32_t countForPersistence(float persistence);
