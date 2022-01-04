@@ -2,6 +2,8 @@ import os
 import argparse
 import numpy as np
 
+import GPy
+
 from hdff import *
 import hdtopology as hdt
 import pandas as pd
@@ -51,29 +53,14 @@ def gaussian_sampling(ex, coreSamples, sampleCount):
 
     return np.random.default_rng().multivariate_normal(sample_mean, sample_covariance, size=sampleCount)
 
-def gaussian_process_sampling(ex, coreSamples, sampleCount):
-    pass
+def gaussian_process_sampling(ex, coreSamples, sampleCount, f):
 
+    sample_dim = coreSamples.shape[1]
+    kernel = GPy.kern.RBF(input_dim=sample_dim, variance=1., lengthscale=1.)
+    model = GPy.models.GPRegression(coreSamples, f, kernel, noise_var=1e-10)
 
-def nearest_neigbors(ex, coreSamples, sampleCount):
-    ##
-    # print(ex.shape, coreSamples.shape)
-    dist = np.linalg.norm(coreSamples - ex, axis=1)
-    # print(dist)
-    max_dist = np.max(dist)
-    ## Generate random samples
-    identified = []
-    count = 0
-    while count<sampleCount:
-        batch = np.random.Generator.multivariate_normal(ex, max_dist*np.identity(len(ex)), 1000)
-
-        dist_mat = pairwise_distances(batch, coreSamples)
-        print(dist_mat)
-        len(dist_mat<0.08==True)
-        break
-
-    # plt.hist(dist)
-    # plt.show()
+    # posteriorTestY = model.posterior_samples_f(testX, full_cov=True, size=3)
+    # simY, simMse = model.predict(testX)
 
 # def lookup_samples(samples, indices):
 #     return samples[indices,:]
@@ -95,7 +82,9 @@ def main():
     print(domainNames)
     domain = data[domainNames]
     domain = pd.DataFrame(domain).to_numpy()
+    frange = pd.DataFrame(data[data.dtype.names[-1]]).to_numpy()
     print("domain:", domain.shape)
+    print("range:", frange.shape)
 
     print("function domain:", domain.shape)
     ##### get domain min max #####
@@ -109,6 +98,7 @@ def main():
 
     all_core_seg = {}
     output_samples = []
+
     # all_core_samples = set()
     for i, ex in enumerate(eg.extrema()):
         ind = int(ex[2])
@@ -116,6 +106,7 @@ def main():
         print("Seg:", len(seg))
         coreSeg = eg.coreSegment(ind, args.extremaCount)[1:]
         print("coreSeg:", ind, len(coreSeg))
+
         # print(ind in set(coreSeg))
         # all_core_seg[ind] = coreSeg
         # all_core_samples.add()
@@ -125,7 +116,7 @@ def main():
         elif args.method == 'nearest_neigbors':
             sample_result = nearest_neigbors(norm_domain[ind,:], norm_domain[coreSeg,:], args.samplePerExtrema)
         elif args.method == 'gaussian_process':
-            sample_result = gaussian_process_sampling(norm_domain[ind,:], norm_domain[coreSeg,:], args.samplePerExtrema)
+            sample_result = gaussian_process_sampling(norm_domain[ind,:], norm_domain[coreSeg,:], args.samplePerExtrema, frange[coreSeg])
         else:
             print("method "+args.method+" is not recognized")
             exit(0)

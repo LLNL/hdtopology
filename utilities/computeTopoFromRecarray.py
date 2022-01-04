@@ -14,7 +14,7 @@ def parse_args():
     parser.add_argument('--outputfilename', type=str, help='Name of output hdff datafile.', required=True)
     parser.add_argument('--method', type=str, help='method of the neighorhood graph.', default="RelaxedGabriel")
     parser.add_argument('--beta', type=float, help='beta parameter for gabriel graph.', default=1.0)
-    parser.add_argument('--data_cube_dim', type=int, help='size of precomputed datacube.', default=2)
+    parser.add_argument('--data_cube_dim', type=int, help='size of precomputed datacube.', default=0)
 
     parser.add_argument('--max_neighbors', type=int, help='method of the neighorhood graph.', default=500)
     return parser.parse_args()
@@ -25,7 +25,7 @@ def main():
 
     beta = args.beta
 
-    ### provide recarray for data input ###
+    ###### get domain and range from recarray ######
     data = np.load(args.inputfilename)
     print(data.dtype)
     domainNames = list(data.dtype.names[0:-1])
@@ -41,7 +41,10 @@ def main():
     ### compute topology
     eg = hdt.ExtremumGraphExt()
     flag_array = np.array([0],dtype=np.uint8)
-    eg.initialize(data, flag_array, edges, True ,10, 0, args.data_cube_dim)
+    mode = 0
+    if args.data_cube_dim>1:
+        mode = 1
+    eg.initialize(data, flag_array, edges, True ,10, mode, args.data_cube_dim)
 
     mc = DataBlockHandle()
     mc.idString("TDA");
