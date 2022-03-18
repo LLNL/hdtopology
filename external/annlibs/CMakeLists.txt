@@ -1,0 +1,5 @@
+# cmake_minimum_required(VERSION 3.3)
+# add_definitions("-Wall" "-g")
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+file(GLOB SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+add_library(libANN STATIC ${SRC_FILES})

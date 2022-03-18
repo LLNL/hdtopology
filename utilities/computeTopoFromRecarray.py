@@ -14,7 +14,7 @@ def parse_args():
     parser.add_argument('--outputfilename', type=str, help='Name of output hdff datafile.', required=True)
     parser.add_argument('--method', type=str, help='method of the neighorhood graph.', default="RelaxedGabriel")
     parser.add_argument('--beta', type=float, help='beta parameter for gabriel graph.', default=1.0)
-    parser.add_argument('--data_cube_dim', type=int, help='size of precomputed datacube.', default=0)
+    parser.add_argument('--data_cube_dim', type=int, help='size of precomputed datacube.', default=2)
 
     parser.add_argument('--max_neighbors', type=int, help='method of the neighorhood graph.', default=500)
     return parser.parse_args()
@@ -30,10 +30,14 @@ def main():
     print(data.dtype)
     domainNames = list(data.dtype.names[0:-1])
     print(domainNames)
-    domain = data[domainNames]
+    domain = data[domainNames] #.view('<f4')
+    # print("domain:", domain.view('<f4').shape)
+    # exit()
+    # print(domain.shape)
+    # domain = domain.view('<f4')
+    # print(domain.shape, domain.dtype)
     domain = pd.DataFrame(domain).to_numpy()
-    print("domain:", domain.shape)
-
+    # exit()
     ### provide array of unint32 for the edges
     edges = ngl.getSymmetricNeighborGraph(args.method, domain, args.max_neighbors, beta)
     print(edges, type(edges), edges.dtype)

@@ -41,5 +41,6 @@ endif()
 
 add_subdirectory(hdfileformat)
 add_subdirectory(ngl)
+add_subdirectory(external/annlibs)
 add_subdirectory(topology)
 add_subdirectory(utilities)
