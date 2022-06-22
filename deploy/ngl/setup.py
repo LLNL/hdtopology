@@ -37,7 +37,7 @@ setuptools.setup(
     author="Shusen Liu, Peer-Timo Bremer",
     author_email="liu42@llnl.gov, bremer5@llnl.gov",
     description="A wrapper library for the C++ NGL library (http://www.ngraph.org/)",
-    install_requires=['numpy==1.19'],
+    install_requires=['numpy==1.22.0'],
     keywords="Empty Region Graph",
     long_description=long_description,
     long_description_content_type="text/markdown",
