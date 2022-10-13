@@ -31,7 +31,7 @@
 
 #include <assert.h>
 #include <vector>
-#include <ANN/ANN.h>
+#include </opt/local/include/ANN/ANN.h>
 
 #include "nglGeometry.hpp"
 

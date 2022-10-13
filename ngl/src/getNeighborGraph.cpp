@@ -28,6 +28,9 @@ using namespace ngl;
 
 typedef void (*fn)(NGLPointSet<float> &points, IndexType **indices, int &numEdges, NGLParams<float> params);
 
+//typedef vector< tuple<ngl::IndexType, ngl::IndexType, float> > iif_tuple;
+typedef std::vector< std::tuple<ngl::IndexType, ngl::IndexType, float>> result_tuple;
+
 static std::map<std::string, fn> gMethods;
 
 void init_methods()
@@ -91,6 +94,35 @@ void getNeighborGraph(const char* method,
   return;
 }
 
+void getNeighborGraph_beta(ANNPointSet<float>* points,
+                      int kmax, 
+                      float param,
+                      IndexType** edges, int* numEdges, float** betas)
+{
+  
+  int i;
+  
+  //std::map<std::string, fn>::iterator mIt;
+
+  //mIt = gMethods.find(method);
+  
+  //if (mIt == gMethods.end()) {
+   // fprintf(stderr,"Did not recognize method name %s\n",method);
+    //assert(false);
+  //}    
+  
+  
+  NGLParams<float> params;
+  
+  params.iparam0 = kmax;
+  params.param1 = param;
+  
+  getBSpectrum(*points, edges, betas, *numEdges, params);
+
+  return;
+}
+
+
 void getSymmetricNeighborGraph(const char* method, 
                                ANNPointSet<float>* points,
                                int kmax, 
@@ -102,7 +134,41 @@ void getSymmetricNeighborGraph(const char* method,
   std::map<ngl::IndexType,int> index_map;
   std::map<ngl::IndexType,int>::iterator mIt;
   std::set<Edge> open;
+  if (strcmp(method, "BSpectrum") == 0) {
+  float* asym_beta;
+  getNeighborGraph_beta(points,kmax,param,&asym,&num_asym, &asym_beta);
 
+  edges->reserve(2*num_asym);
+  
+  for (int i=0;i<2*num_asym;i+=2) {
+    if (open.find(Edge(asym[i],asym[i+1])) == open.end()) {
+      edges->push_back(asym[i]);
+      edges->push_back(asym[i+1]);
+      edges->push_back(asym[i+1]);
+      edges->push_back(asym[i]);
+      if (i==0){
+      fprintf(stderr,"%u %u %f\n",asym[i],asym[i+1],asym_beta[i]);
+      fprintf(stderr,"%u %u %f\n",asym[i+1],asym[i],asym_beta[i]);
+      } else if ( i < num_asym){
+      fprintf(stderr,"%u %u %f\n",asym[i],asym[i+1],asym_beta[i-1]);
+      fprintf(stderr,"%u %u %f\n",asym[i+1],asym[i],asym_beta[i-1]);
+  
+      } 
+
+      //fprintf(stderr,"%u %u %f\n",asym[i],asym[i+1],asym_beta[i-1]);
+      //fprintf(stderr,"%u %u %f\n",asym[i+1],asym[i],asym_beta[i-1]);
+      open.insert(Edge(asym[i],asym[i+1]));
+    }
+    else 
+      //fprintf(stderr,"about to seg\n"); 
+      open.erase(Edge(asym[i],asym[i+1]));   
+  }
+
+  delete[] asym;
+  delete[] asym_beta; 
+  return;
+  } else {
+  
   getNeighborGraph(method,points,kmax,param,&asym,&num_asym);
 
   edges->reserve(2*num_asym);
@@ -122,8 +188,43 @@ void getSymmetricNeighborGraph(const char* method,
     else 
       open.erase(Edge(asym[i],asym[i+1]));   
   }
-
+ // fprintf(stderr,"num_asym is %u\n",num_asym);
   delete[] asym;
   
   return;
+  }
+  //return;
+
 }
+
+
+
+
+
+
+std::vector< std::tuple<ngl::IndexType, ngl::IndexType, float>> getSymmetricBetaSpectrum(ANNPointSet<float>* points,
+                               int kmax, float param)
+{
+  IndexType* asym;
+  float* asym_beta;
+  int num_asym;
+  std::set<Edge> open;
+  getNeighborGraph_beta(points,kmax,param,&asym,&num_asym, &asym_beta);
+  
+  result_tuple spectrum; 
+  for (int i=0;i<2*num_asym;i+=2) {
+      if (open.find(Edge(asym[i],asym[i+1])) == open.end()) {
+      //fprintf(stderr,"%u %u %f\n",asym[i],asym[i+1],asym_beta[i-(i/2)]);
+      //fprintf(stderr,"%u %u %f\n",asym[i+1],asym[i],asym_beta[i-(i/2)]);
+      spectrum.push_back( std::tuple<IndexType, IndexType, float>(asym[i],asym[i+1],asym_beta[i-(i/2)]) );
+      spectrum.push_back( std::tuple<IndexType, IndexType, float>(asym[i+1],asym[i],asym_beta[i-(i/2)]) );
+      open.insert(Edge(asym[i],asym[i+1]));
+                                                            }
+   else 
+     open.erase(Edge(asym[i],asym[i+1]));   
+                                  }
+  delete[] asym;
+  delete[] asym_beta; 
+  return spectrum;
+}
+

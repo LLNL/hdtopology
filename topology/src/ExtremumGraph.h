@@ -10,6 +10,7 @@
 #include "JointDistributions.h"
 #include <math.h>
 #include "Flags.h"
+#include "../../ngl/include/getNeighborGraph.h"
 
 // #define HD_FILE_FORMAT_H
 // #ifdef HD_FILE_FORMAT_H
@@ -84,6 +85,24 @@ public:
                   uint32_t resolution = 128, int32_t target_attr = -1,
                   std::vector<HistogramType> histogramTypes = std::vector<HistogramType> (1, REGULAR));
 
+
+  //! Compute segmentation given new edges. 
+  void computeSegmentation_addedge(const HDData* data, const Flags* flags, const Neighborhood* edges);
+
+  void computeSegmentation_addedge(const HDData* data, const Flags* flags, EdgeIterator& eIt);
+  
+ //void computeSegmentation(const HDData* data, const Flags* flags, const Neighborhood* edges, const ComputeMode mode);
+
+  ///void computeSegmentation(const HDData* data, const Flags* flags, EdgeIterator& eIt, const ComputeMode mode);
+
+  //! compute segmentation by beta 
+
+  void computeSegmentation_bybeta(const HDData* data, const Flags* flags, const ComputeMode mode, uint32_t segment_change); 
+
+
+  //std::vector< std::tuple<ngl::IndexType, ngl::IndexType, float>> computeBeta_Spectrum(ngl::ANNPointSet<float>* points,int kmax,float param); 
+
+ void computeBeta_Spectrum(ngl::ANNPointSet<float>* points,int kmax,float param); 
   //! Return the segmentation for the given persistence
   uint32_t countForPersistence(float persistence);
 
@@ -224,8 +243,28 @@ private:
   //! The array of saddles
   std::vector<Saddle> mSaddles;
 
+  //! Vector of tuples containing beta spectrum information 
+
+  std::vector< std::tuple<ngl::IndexType, ngl::IndexType, float>> mBeta_Spec;
+
+  //! Array of beta values 
+  // std::vector<float> mBeta; 
+  std::vector<std::pair<float,uint32_t>> mBeta;
+
+    //! Array tracking segmentation changes 
+  std::vector<uint32_t> mSeg_change; 
+  
+  //! Array of edge indices 
+  std::vector<uint32_t> mIndex; 
+
+  //! Array of slopes values 
+  std::vector<float> mSlope;
+
   //! The array of steepest neighbors
   std::vector<uint32_t> mSteepest;
+
+  //! Array of path compressed steepest neighbors 
+  std::vector<uint32_t> mSteepest_uncomp; 
 
   //! The set of segments
   std::vector<std::vector<uint32_t> > mSegments;

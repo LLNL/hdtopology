@@ -161,6 +161,50 @@ namespace ngl
       numEdges = (int) edges.size() / 2;
       destroyValid();
     }
+
+    virtual void getNeighbors_beta(NGLPoint<T> &p, NGLPointSet<T> &points, IndexType **indices, int &numNeighbors, float **ptrBetas) = 0;
+
+    virtual void getNeighborGraph_beta(NGLPointSet<T> &points, IndexType **ptrIndices, int &numEdges, float **ptrBetas)
+    {
+      createValid(points.numPoints);
+      std::vector<int> edges;
+      std::vector<float> betas;
+      for(unsigned int i=0; i<points.numPoints;i++)
+      {
+        IndexType *indices_i = 0;
+        float *betas_i = 0;
+        int numNeighbors = 0;
+
+        this->invalidate(i);
+        this->getNeighbors_beta(points[i], points, &indices_i, numNeighbors, &betas_i);
+        this->validate(i);
+
+        for(int k=0;k<numNeighbors;k++)
+        {
+          if(i==indices_i[k]) continue;
+          edges.push_back(i);
+          edges.push_back(indices_i[k]);
+          betas.push_back(betas_i[k]);
+         // fprintf(stderr,"betas_i value is  %f\n",betas_i[k]);
+        }
+        if(indices_i) delete[] indices_i;
+        if(betas_i) delete[] betas_i;
+      }
+      *ptrIndices = new IndexType[(int) edges.size()];
+      IndexType *indices = *ptrIndices;
+      *ptrBetas = new float[(int) betas.size()];
+			float *b_indices = *ptrBetas;
+      for(unsigned int k = 0; k < edges.size(); k++)
+      {
+        indices[k] = edges[k];
+        if(k < betas.size())
+        {
+        b_indices[k] = betas[k]; 
+        }
+      }
+      numEdges = (int) edges.size() / 2;
+      destroyValid();
+    }
   };
 
   template<typename T>

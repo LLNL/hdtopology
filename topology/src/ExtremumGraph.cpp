@@ -19,6 +19,8 @@
 #include <cereal/types/vector.hpp>
 #include <membuf.h>
 
+#include "../../ngl/include/getNeighborGraph.h"
+
 bool ExtremumGraphExt::cmp::operator()(uint32_t i, uint32_t j) const
 {
   if (ascending) {
@@ -466,6 +468,7 @@ void ExtremumGraphExt::computeSegmentation(const HDData* data, const Flags* flag
   fprintf(stderr, "---- ExtremumGraphExt::computeSegmentation ----\n");
 
   mSteepest.resize(data->size());
+  // fprintf(stderr, "---- here1 ----\n");
   std::vector<float> slope(data->size(),-10e34);
   uint32_t i;
   cmp smaller(data,mAscending);
@@ -492,9 +495,11 @@ void ExtremumGraphExt::computeSegmentation(const HDData* data, const Flags* flag
   // mNeighbor.resize(data->size());
 
   const uint32_t* e;
+  // fprintf(stderr, "---- here2 ----\n");
   while (!eIt.end()) {
 
     e = *eIt;
+   // fprintf(stderr, "---- here3 ----\n");
 
     //if ((e[0] == 1) || (e[1] == 1)) {
     //  fprintf(stderr,"Processing edge: {(%d,%f), (%d,%f)}\n",e[0],data->f(e[0]),e[1],data->f(e[1]));
@@ -535,26 +540,32 @@ void ExtremumGraphExt::computeSegmentation(const HDData* data, const Flags* flag
 
     eIt++;
   }
-
+  mSlope = slope; 
   // store the per-point steepest info
   // msteepest = steepest;
   // mslope = slope;
-
+  mSteepest_uncomp = mSteepest; 
   // Path compress all edges
+  // fprintf(stderr, "---- here3 ----\n");
   for (i=0;i<data->size();i++) {
     if (mSteepest[i] != LNULL) {
+      // fprintf(stderr, "---- here4 ----\n");
       mSteepest[i] = unionfind(mSteepest,i);
 
       if (mSteepest[i] == i) {
         //fprintf(stderr,"Found Extremum %d\n",i);
+        // fprintf(stderr, "---- here55 ----\n");
         mExtrema.push_back(Extremum(i,data->f(i),mExtrema.size()));
+       // fprintf(stderr, "Extrema %d\n",mSteepest[i]);
       }
     }
   }
-
+  
+// fprintf(stderr, "---- here5 ----\n");
   // A map from neighboring segments to saddles
   std::map<std::pair<uint32_t, uint32_t>, uint32_t> saddle_edges;
   std::map<std::pair<uint32_t, uint32_t>, uint32_t>::iterator it;
+// fprintf(stderr, "---- here6 ----\n");
 
   eIt.reset();
 
@@ -563,12 +574,11 @@ void ExtremumGraphExt::computeSegmentation(const HDData* data, const Flags* flag
   // Find the highest lower vertex of all edges that connect two different segments
   while (!eIt.end()) {
     e = *eIt;
-
+    
     if ((mSteepest[e[0]] == LNULL) || (mSteepest[e[1]] == LNULL)) {
       eIt++;
       continue;
     }
-
     // Make sure we sort the pair in some deterministic way
     std::pair<uint32_t,uint32_t> p(std::min(mSteepest[e[0]],mSteepest[e[1]]),
                                    std::max(mSteepest[e[0]],mSteepest[e[1]]));
@@ -602,7 +612,7 @@ void ExtremumGraphExt::computeSegmentation(const HDData* data, const Flags* flag
 
     eIt++;
   }
-
+   
   // Assemble the index map of extrema to index
   std::map<uint32_t,uint32_t> order;
   std::map<uint32_t,uint32_t>::iterator mIt,mIt2;
@@ -622,11 +632,210 @@ void ExtremumGraphExt::computeSegmentation(const HDData* data, const Flags* flag
     mSaddles.push_back(Saddle(it->second,data->f(it->second),mIt->second,mIt2->second));
   }
 
-   // If we only need the raw complex
   if  (mode == NONE)  {
     // Free up the memory of the segmentation
     mSteepest = std::vector<uint32_t>();
   }
+}
+
+void  ExtremumGraphExt::computeBeta_Spectrum(ngl::ANNPointSet<float>* points, int kmax,float param)
+{
+
+// Store beta spectrum output as vector of tuples
+std::vector< std::tuple<ngl::IndexType, ngl::IndexType, float>> Beta_Spec; 
+Beta_Spec = getSymmetricBetaSpectrum(points,kmax,param);
+
+std::vector<float> betas(Beta_Spec.size(),0);
+//std::vector<float> betas;
+std::vector<ngl::IndexType> v_index(Beta_Spec.size()*2); 
+// std::vector<float> beta(Beta_Spec.size()); 
+std::vector<std::pair<float,uint32_t>> beta(Beta_Spec.size()); 
+uint32_t iter1 = 0;
+uint32_t iter2 = 0;
+
+// Store beta values in vector of pairs that keeps track of original indices before 
+// sorting. Store corresponding edge info in vector. 
+
+for (std::vector< std::tuple<ngl::IndexType, ngl::IndexType, float>>::const_iterator i = Beta_Spec.begin(); i != Beta_Spec.end(); ++i) {
+  v_index[iter1] = get<0>(*i);
+  v_index[iter1+1] = get<1>(*i); 
+  beta[iter2] = std::make_pair(get<2>(*i), iter2); 
+ // fprintf(stderr, "%u %u %f\n",get<0>(*i),get<1>(*i),get<2>(*i));
+  ++iter2;
+  iter1=iter1+2; 
+
+}
+
+
+mIndex = v_index; 
+// sort beta values 
+std::sort(beta.rbegin(), beta.rend());
+mBeta = beta; 
+
+
+}
+void ExtremumGraphExt::computeSegmentation_addedge(const HDData* data, const Flags* flags, const Neighborhood* edges)
+{
+if(edges){
+    NeighborhoodIterator it(*edges);
+    computeSegmentation_addedge(data, flags, it);
+  }
+}
+
+
+
+void ExtremumGraphExt::computeSegmentation_addedge(const HDData* data, const Flags* flags, EdgeIterator& eIt)
+{
+  fprintf(stderr, "---- ExtremumGraphExt::computeSegmentation_addedge ----\n");
+
+  uint32_t i;
+  cmp smaller(data,mAscending);
+  float tmp,mag;
+  const uint32_t* e;
+  while (!eIt.end()) {
+    
+    e = *eIt;
+
+    //if ((e[0] == 1) || (e[1] == 1)) {
+    //  fprintf(stderr,"Processing edge: {(%d,%f), (%d,%f)}\n",e[0],data->f(e[0]),e[1],data->f(e[1]));
+    //  fprintf(stderr,"\t %d %d\n",mSteepest[e[0]],mSteepest[e[1]]);
+    //}
+    // Ignore half the edges because this is symmetric and all the ones leading
+    // to invalid vertices
+    if (smaller(e[1],e[0]) || (mSteepest[e[0]]==LNULL) || (mSteepest[e[1]]==LNULL)) {
+      eIt++;
+      continue;
+    }
+
+
+    //if (eIt.hasLength()){
+     // mag = eIt.length();
+    //}
+    //else{
+    mag = data->dist(e[0],e[1]);
+    //}
+
+    if (mag < 1e-8)
+      tmp = 10e10;
+    else
+      tmp = fabs(data->f(e[1]) - data->f(e[0])) / mag;
+    // check if edge is steepest 
+    
+    if (mSlope[e[0]] < tmp) {
+      // if edge is steepest, check if higher vertex points to a different max than previous steepest
+       mSlope[e[0]] = tmp;
+      if (mSteepest[e[1]] == mSteepest[mSteepest_uncomp[e[0]]]) {
+        mSteepest_uncomp[e[0]] = e[1]; 
+        eIt++;
+        continue;
+      } else {
+        // update steepest edge in uncompressed 
+        mSteepest_uncomp[e[0]] = e[1];
+        // update max in path compressed array
+        mSteepest[e[0]] = mSteepest[e[1]] ;
+        //record segmentation changes along the way 
+
+        mSeg_change[e[0]] = mSeg_change[e[0]] + 1; 
+        // update max in path compressed array for all vertices that flow into e[0] 
+        
+        for (i=0;i<data->size();i++) {
+         if (mSteepest[i] == mSteepest[e[0]]) {
+             mSeg_change[i] = mSeg_change[i] + 1; 
+             mSteepest[i] = unionfind(mSteepest_uncomp,i);
+             //mSteepest[i] = mSteepest[e[0]];
+           }
+          }
+         }
+    }
+    eIt++;
+    }
+  
+
+  
+    // count number of maxima 
+    //mExtrema.clear();
+     mExtrema = std::vector<Extremum> ();
+    for (i=0;i<data->size();i++) {
+        if (mSteepest[i] == i) {
+           //fprintf(stderr,"Found Extremum %d\n",i);
+            mExtrema.push_back(Extremum(i,data->f(i),mExtrema.size()));
+        }
+    }
+   fprintf(stderr, "mExtrema size: %ld \n", mExtrema.size());
+
+  } 
+
+void ExtremumGraphExt::computeSegmentation_bybeta(const HDData* data, const Flags* flags, const ComputeMode mode, uint32_t segment_change)
+{
+std::vector<uint32_t> beta_2_ind; 
+int arr_size = 0;
+int order_index = 0;
+std::vector<uint32_t> Seg_change(data->size());
+mSeg_change = Seg_change; 
+
+// extract edges with beta critical value >= 2
+for (int i=0;i<mBeta.size();i++) {
+  if (mBeta[i].first >= 2) {
+    ++arr_size;
+    beta_2_ind.push_back(mIndex[2*mBeta[i].second]); 
+    beta_2_ind.push_back(mIndex[2*mBeta[i].second+1]); 
+  } else {
+    order_index = i; 
+    break; 
+  }
+}
+
+// compute full segmentation for the edges obtained above. 
+
+uint32_t* beta_2_arr = beta_2_ind.data();
+
+Neighborhood beta2_neighborhood(beta_2_arr, arr_size); 
+
+computeSegmentation(data, flags, &beta2_neighborhood, mode);
+fprintf(stderr, "Beta: 2, mExtrema size: %ld, mSaddle size: %ld \n", mExtrema.size(), mSaddles.size());
+
+// Loop through beta values in descending order, adding edges and computing segmentation. 
+
+for (int i = 190; i >= 150 ; i-=10) // a = -0.2 to 0.2 step 0.01
+{
+    
+const float a = i / 100.0;
+const float b = (i+10) / 100.0;
+arr_size = 0;
+std::vector<uint32_t> beta_ind;
+for (int i=order_index;i<mBeta.size();i++) {
+  if (mBeta[i].first >= a && mBeta[i].first < b) {
+    ++arr_size;
+    beta_ind.push_back(mIndex[2*mBeta[i].second]); 
+    beta_ind.push_back(mIndex[2*mBeta[i].second+1]); 
+  } else {
+    order_index = i; 
+    break; 
+  }
+
+}
+
+//fprintf(stderr, "Order Index: %d",order_index);
+
+uint32_t* beta_arr = beta_ind.data();
+
+Neighborhood beta_neighborhood(beta_arr, arr_size); 
+
+computeSegmentation_addedge(data, flags, &beta_neighborhood);
+
+fprintf(stderr, "Beta: %f, mExtrema size: %ld\n", a, mExtrema.size());
+
+//fprintf(stderr, "Beta: %f, mExtrema size: %ld, mSaddle size: %ld \n", a, mExtrema.size(), mSaddles.size());
+}
+
+if (segment_change == 1) {
+  for(int i=0;i<mSeg_change.size();i++) {
+
+    fprintf(stderr, "%d %u \n",i,mSeg_change[i]);
+  }
+}
+
+
 }
 
 void ExtremumGraphExt::computeHierarchy()

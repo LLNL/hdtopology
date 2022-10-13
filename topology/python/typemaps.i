@@ -185,6 +185,25 @@ import_array();
     $1 = (uint32_t) PyLong_AsLong($input);
 }
 
+//adding ngl ANNpoint set input functionality 
+
+%typemap(in) (ngl::ANNPointSet<float>* ) (ngl::ANNPointSet<float> tmp){
+
+  PyArrayObject* data_ptr = PyArray_GETCONTIGUOUS((PyArrayObject*)$input);
+  
+  if (PyArray_TYPE(data_ptr) != NPY_FLOAT32)
+    SWIG_exception(SWIG_ValueError,"Expected array of float32.");
+
+  // Set the current dimension 
+  ngl::Geometry<float>::init(PyArray_DIM(data_ptr,1));
+
+  // Read in the number of points
+  tmp.loadData((float*)PyArray_DATA(data_ptr),PyArray_DIM(data_ptr,0));
+  
+  $1 = &tmp;
+}
+
+
 /*
 %typemap(out) uint32_t {
     $result = PyLong_FromLong((long) $1);

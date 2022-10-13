@@ -156,6 +156,64 @@ namespace ngl
 				}
 			}
 		}
+
+		virtual void getNeighbors_beta(NGLPoint<T> &p, NGLPointSet<T> &points, IndexType **ptrIndices, int &numNeighbors, float **ptrBetas) {
+			assert(test);
+			std::vector<IndexType> neighbors;
+			std::vector<float> betas;
+			int candidateSize;
+			IndexType *candidateNeighbors;
+			
+			// 
+			// Assumes that point set in 'points' has pre-computed a set of neighbors (say, KNN with k = kMax)
+			// Or if it doesn't, the subset equals the entire set
+			//
+			points.getNeighbors(p, &candidateNeighbors, candidateSize);
+			
+			EdgeInfo<T> edgeInfo;
+			edgeInfo.initialize();
+			for(int k = 0; k < candidateSize; k++ )
+			{
+				IndexType idx = candidateNeighbors[k];
+				if(!NGMethod<T>::isValid(idx)) continue;
+				
+				// Pre-compute edge information
+				edgeInfo.compute(p, points[idx]);
+				
+				if(edgeInfo.len2==0) continue;
+				//bool isRegionEmpty = true;
+				std::vector<float> betas_p;  
+				for(int j = 0; j < candidateSize; j++ )
+				{
+					if(j==k) continue;
+					IndexType idx2 = candidateNeighbors[j];
+					if(!NGMethod<T>::isValid(idx2)) continue;
+					float testresult = test->contains(edgeInfo, points[idx2]);
+					betas_p.push_back(testresult);
+				}
+				float min = *min_element(betas_p.begin(), betas_p.end());
+				betas.push_back(min);
+				neighbors.push_back(idx);
+			
+			}
+			
+			edgeInfo.destroy();
+			delete[] candidateNeighbors;
+			//TESTING BEHAVIOR
+			//delete[] betas; 
+            
+			numNeighbors = (int) neighbors.size();
+			if(neighbors.size()>0) {
+				*ptrIndices = new IndexType[(int) neighbors.size()];
+				IndexType *indices = *ptrIndices;
+				*ptrBetas = new float[(int) betas.size()];
+				float *b_indices = *ptrBetas;
+				for(unsigned int k=0;k<neighbors.size();k++) {
+					indices[k] = neighbors[k];
+					b_indices[k] = betas[k];
+				}
+			}
+		}
 	};
 	
 	template<typename T>

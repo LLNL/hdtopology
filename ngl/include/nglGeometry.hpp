@@ -114,6 +114,36 @@ namespace ngl
 			}
 			return res;
 		}
+		inline static T getbeta(NGLPoint<T> & q, NGLPoint<T> & p, NGLPoint<T> & r) 
+		{
+			T num = 0;
+			T denom = 0;
+			for(unsigned int k=0;k<D;k++) 
+			{
+				num+= (-1*q[k]*q[k])+2*q[k]*r[k]-r[k]*r[k];
+				denom+= p[k]*q[k]-p[k]*r[k]-q[k]*q[k]+q[k]*r[k];
+			}
+			//fprintf(stderr,"denom is %f\n",denom);
+			//if (denom<0.0000001){
+			//fprintf(stderr,"num is %f\n",num);
+			//return 0;
+			//fprintf(stderr,"in if statement\n"); 
+			//} else {
+
+			//if (denom<1e-8)
+			//{
+            //fprintf(stderr,"potential overflow!"); 
+			///fprintf(stderr, "beta %f \n",denom))
+			//T beta=10e10;
+			//return beta;
+			//} else 
+		//	{
+			T beta=num/denom;
+			return beta;
+			//}
+			
+		
+		}
 		inline static T normalize(NGLPoint<T> & a) 
 		{
 			T adota = dot(a,a);

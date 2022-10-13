@@ -17,4 +17,8 @@ void getSymmetricNeighborGraph(const char* method,
                                float param,
                                std::vector<ngl::IndexType>* edges);
 
+std::vector< std::tuple<ngl::IndexType, ngl::IndexType, float>> getSymmetricBetaSpectrum(ngl::ANNPointSet<float>* points,
+                              int kmax,
+                              float param); 
+
 #endif

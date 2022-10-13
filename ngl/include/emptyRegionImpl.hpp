@@ -193,6 +193,82 @@ namespace ngl
 			}
 		}
 	};
+
+    // Lune Based Beta Spectrum 
+
+	template<typename T>
+	class BSpectrum: public EmptyRegionTest<T> 
+	{
+		NGLPoint<T> rp;
+		NGLPoint<T> qp;
+		NGLPoint<T> proj;
+	public:
+		virtual void initialize()
+		{
+			Geometry<T>::allocate(rp);
+			Geometry<T>::allocate(qp);
+			Geometry<T>::allocate(proj);
+		}
+		virtual void destroy() 
+		{
+			Geometry<T>::deallocate(rp);
+			Geometry<T>::deallocate(qp);
+			Geometry<T>::deallocate(proj);
+		}
+		virtual T contains(EdgeInfo<T> &edge, NGLPoint<T> &r) 
+		{
+			NGLPoint<T> &c1 = rp;
+			NGLPoint<T> &c2 = qp;
+			Geometry<T>::interpolate(edge.p, edge.q, 0.5, c1);
+			Geometry<T>::interpolate(edge.p, edge.q, 0.5, c2);
+			T r2 = edge.radius2;
+			T d1 = Geometry<T>::distanceL2sqr(r, c1);
+			T d2 = Geometry<T>::distanceL2sqr(r, c2);
+
+			if(fmax(d2-r2, d1-r2) < 0) {
+				T er = edge.radius2;
+			 //T h2 = r2 - edge.radius2;
+			//	T delta = sqrt(h2);
+				Geometry<T>::subtract(r, edge.p, rp);
+				Geometry<T>::subtract(edge.q, edge.p, qp);
+				T t = Geometry<T>::dot(rp,qp)/Geometry<T>::dot(qp,qp);
+				Geometry<T>::interpolate(edge.p, edge.q, t, proj);
+				T dproj = sqrt(Geometry<T>::distanceL2sqr(r, proj));
+				T dprojmidsqr = (Geometry<T>::distanceL2sqr(proj, edge.midpoint));
+				T denomsqrt = (-dprojmidsqr - (dproj*dproj) + edge.radius2)/(2*dproj);
+                T denom = denomsqrt*denomsqrt+edge.radius2; 
+			    //if (denom == 0){
+				//	return 10e-34;
+				//} else {
+				T beta_crit = sqrt(er/denom); 
+				return beta_crit;
+				//}
+			} else {
+          
+				if (Geometry<T>::distanceL2sqr(r,edge.p) < Geometry<T>::distanceL2sqr(r,edge.q))
+				{
+				T beta = Geometry<T>::getbeta(edge.p,edge.q,r);
+				if (beta < 0)
+				{
+				return 10e10;
+				} else 
+				{
+				return beta;
+				}
+				} else 
+				{
+				T beta = Geometry<T>::getbeta(edge.q,edge.p,r);
+				if (beta < 0)
+				{
+					return 10e10;
+				} else 
+				{
+				return beta;
+				}
+				}
+			}
+		}
+	};
 	
 	
 	//
@@ -250,6 +326,17 @@ namespace ngl
 	}
 
 	template<typename T>
+	void generalERgraph_beta(NGLPointSet<T> &points, IndexType **indices, float **betas, int &numEdges, NGLParams<T> params, EmptyRegionTest<T> *method)
+	{
+		assert(method);
+		EmptyRegionMethod<T> *m = new EmptyRegionMethod<T>(method);
+		points.initialize(params);		
+		m->initialize();
+		m->getNeighborGraph_beta(points, indices, numEdges, betas);
+		delete m;
+	}
+
+	template<typename T>
 	void getGabrielGraph(NGLPointSet<T> &points, IndexType **indices, int &numEdges, NGLParams<T> params) 
 	{
 		EmptyRegionTest<T> *method = new Gabriel<T>();
@@ -278,7 +365,17 @@ namespace ngl
 		method->destroy();
 		delete method;
 	}
-	
+
+	template<typename T>
+	void getBSpectrum(NGLPointSet<T> &points, IndexType **indices, float **betas, int &numEdges, NGLParams<T> params)
+	{
+		EmptyRegionTest<T> *method = new BSpectrum<T>();
+		method->initialize();
+		generalERgraph_beta(points, indices, betas, numEdges, params, method);
+		method->destroy();
+		delete method;
+	}
+
 	template<typename T>
 	void getEllipticGabrielGraph(NGLPointSet<T> &points, IndexType **indices, int &numEdges, NGLParams<T> params)
 	{
